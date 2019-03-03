@@ -9,7 +9,8 @@
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+#include "stb_image.h"
+
 
 #ifdef _WINDOWS
 #define RESOURCE_FOLDER ""
@@ -54,9 +55,13 @@ int main(int argc, char *argv[])
 
 	ShaderProgram program;
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	ShaderProgram untexturedProgram;
+	untexturedProgram.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 
 	GLuint centerTexture = LoadTexture(RESOURCE_FOLDER"flower.png");
 	GLuint wingsTexture = LoadTexture(RESOURCE_FOLDER"dots.jpg");
+	GLuint stemTexture = LoadTexture(RESOURCE_FOLDER"stem.jpg");
+	GLuint grassTexture = LoadTexture(RESOURCE_FOLDER"grass.jpg");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glClearColor(208.0/255.0f, 232.0/255.0f, 250.0/255.0f, 1.0f);
@@ -81,22 +86,38 @@ int main(int argc, char *argv[])
         }
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//STEM
+		//grass
 		program.SetModelMatrix(modelMatrix);
-		glBindTexture(GL_TEXTURE_2D, wingsTexture);
+		glBindTexture(GL_TEXTURE_2D, grassTexture);
 
-		float stem[] = { 0.01f, 0.0f, -0.01f, 0.0f, -0.01f, -1.8f, 0.01f, 0.0f, -0.01f, -1.8f, 0.01f, -1.8f };
+		float grass[] = { 1.777f, -0.75f, -1.777f, -0.75f, -1.777f, -1.777f, 1.777f, -0.75f, -1.777f, -1.777f, 1.777f, -1.777f };
 
-		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, stem);
+		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, grass);
 		glEnableVertexAttribArray(program.positionAttribute);
 
-		float stemtex[] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
-		glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, stemtex);
+		float grassTex[] = { 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0, 1.0, 1.0, 1.0 };
+		glVertexAttribPointer(program.texCoordAttribute, 2, GL_FLOAT, false, 0, grassTex);
 		glEnableVertexAttribArray(program.texCoordAttribute);
 
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDisableVertexAttribArray(program.positionAttribute);
 		glDisableVertexAttribArray(program.texCoordAttribute);
+
+		//STEM
+		glUseProgram(untexturedProgram.programID);
+		untexturedProgram.SetModelMatrix(modelMatrix);
+		untexturedProgram.SetProjectionMatrix(projectionMatrix);
+		untexturedProgram.SetViewMatrix(viewMatrix);
+
+		float stem[] = { 0.01f, 0.0f, -0.01f, 0.0f, -0.01f, -1.8f, 0.01f, 0.0f, -0.01f, -1.8f, 0.01f, -1.8f };
+
+		glVertexAttribPointer(untexturedProgram.positionAttribute, 2, GL_FLOAT, false, 0, stem);
+		glEnableVertexAttribArray(untexturedProgram.positionAttribute);
+		untexturedProgram.SetColor(0.0/255.0f, 153.0/255.0f, 45.0/255.0f, 1.0f);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDisableVertexAttribArray(untexturedProgram.positionAttribute);
+		glDisableVertexAttribArray(untexturedProgram.texCoordAttribute);
+		glUseProgram(program.programID);
 
 		//WINGS
 		program.SetModelMatrix(modelMatrix);
