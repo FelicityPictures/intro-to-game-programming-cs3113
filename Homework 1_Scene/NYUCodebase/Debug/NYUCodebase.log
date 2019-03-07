@@ -1,5 +1,0 @@
-﻿  main.cpp
-c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 1\nyucodebase\main.cpp(67): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
-c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 1\nyucodebase\main.cpp(116): warning C4305: 'argument': truncation from 'double' to 'float'
-c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 1\nyucodebase\main.cpp(131): warning C4305: 'initializing': truncation from 'double' to 'float'
-  NYUCodebase.vcxproj -> C:\Users\Felicity\Desktop\github\intro-to-game-programming-cs3113\Homework 1\Debug\NYUCodebase.exe
