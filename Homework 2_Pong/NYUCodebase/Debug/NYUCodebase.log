@@ -1,0 +1,6 @@
+﻿  main.cpp
+c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 2_pong\nyucodebase\main.cpp(128): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 2_pong\nyucodebase\main.cpp(134): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 2_pong\nyucodebase\main.cpp(166): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+c:\users\felicity\desktop\github\intro-to-game-programming-cs3113\homework 2_pong\nyucodebase\main.cpp(171): warning C4305: 'argument': truncation from 'double' to 'GLclampf'
+  NYUCodebase.vcxproj -> C:\Users\Felicity\Desktop\github\intro-to-game-programming-cs3113\Homework 2_Pong\Debug\NYUCodebase.exe
