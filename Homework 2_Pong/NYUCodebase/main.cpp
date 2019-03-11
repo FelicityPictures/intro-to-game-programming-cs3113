@@ -19,16 +19,72 @@
 
 SDL_Window* displayWindow;
 
-//float* hexToNumbers(char x[]) {
-//	if (x.length != 6) {
-//		return NULL;
-//	}
-//	float ret[3];
-//	ret[0] = (((int)x[0] * 16) + (int)x[1]) / 255.0f;
-//	ret[1] = (((int)x[2] * 16) + (int)x[3]) / 255.0f;
-//	ret[2] = (((int)x[4] * 16) + (int)x[5]) / 255.0f;
-//	return ret;
-//}
+glm::mat4 projectionMatrix = glm::mat4(1.0f);
+glm::mat4 modelMatrix = glm::mat4(1.0f);
+glm::mat4 viewMatrix = glm::mat4(1.0f);
+glm::mat4 identityMatrix = glm::mat4(1.0f);
+
+class Entity {
+public:
+	float x;
+	float y;
+	//float rotation;
+	//GLuint textureID;
+
+	float width;
+	float height;
+	float vertices[12];
+	float velocityX = 0.0f;
+	float velocityY = 0.0f;
+	float displaceX = 0.0f;
+	float displaceY = 0.0f;
+	bool winner = false;
+	//float direction_x;
+	//float direction_y;
+	Entity(const float& x, const float& y, const float& width, const float& height) :
+		x(x), y(y), width(width), height(height) {
+		float halfWidth = width / 2;
+		float halfHeight = height / 2;
+		vertices[0] = x + halfWidth;
+		vertices[1] = y + halfHeight;
+		vertices[2] = x - halfWidth;
+		vertices[3] = y + halfHeight;
+		vertices[4] = x - halfWidth;
+		vertices[5] = y - halfHeight;
+
+		vertices[6] = x + halfWidth;
+		vertices[7] = y + halfHeight;
+		vertices[8] = x - halfWidth;
+		vertices[9] = y - halfHeight;
+		vertices[10] = x + halfWidth;
+		vertices[11] = y - halfHeight;
+	}
+
+	void Draw(ShaderProgram &p) const {
+		p.SetModelMatrix(modelMatrix);
+		p.SetProjectionMatrix(projectionMatrix);
+		p.SetViewMatrix(viewMatrix);
+		glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+		glEnableVertexAttribArray(p.positionAttribute);
+		glm::mat4 transformMatrix = identityMatrix;
+		transformMatrix = glm::translate(transformMatrix, glm::vec3(displaceX, displaceY, 0.0f));
+		p.SetModelMatrix(transformMatrix);
+		if (winner) {
+			p.SetColor(0.0f / 255.0f, 153.0f / 255.0f, 0.0f / 255.0f, 1.0f);
+		}
+		else {
+			p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+		}
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glDisableVertexAttribArray(p.positionAttribute);
+		glDisableVertexAttribArray(p.texCoordAttribute);
+	}
+	void update(float elapsed) {
+		displaceX += velocityX*elapsed;
+		displaceY += velocityY*elapsed;
+	}
+};
+
 
 int main(int argc, char *argv[])
 {
@@ -41,14 +97,11 @@ int main(int argc, char *argv[])
     glewInit();
 #endif
 
+
 	glViewport(0, 0, 640, 360);
 	//No Textures
 	ShaderProgram program;
 	program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
-	glm::mat4 projectionMatrix = glm::mat4(1.0f);
-	glm::mat4 modelMatrix = glm::mat4(1.0f);
-	glm::mat4 viewMatrix = glm::mat4(1.0f);
-	glm::mat4 identityMatrix = glm::mat4(1.0f);
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	glUseProgram(program.programID);
@@ -62,6 +115,11 @@ int main(int argc, char *argv[])
 	pongVelocityX = pongVelocityY = 0.75f;
 	bool rightUp, rightDown, leftUp, leftDown;
 	rightUp = rightDown = leftUp = leftDown = false;
+	Entity pong = Entity(0.0f, 0.0f, 0.1f, 0.1f);
+	pong.velocityX = 0.75f;
+	pong.velocityY = 0.75f;
+	Entity leftPaddle = Entity(-1.6f, 0.0f, 0.02f, 0.2f);
+	Entity rightPaddle = Entity(1.6f, 0.0f, 0.02f, 0.2f);
 
     bool done = false;
     while (!done) {
@@ -100,77 +158,64 @@ int main(int argc, char *argv[])
         }
         glClear(GL_COLOR_BUFFER_BIT);
 
-		//PONG
-		program.SetModelMatrix(modelMatrix);
-		program.SetProjectionMatrix(projectionMatrix);
-		program.SetViewMatrix(viewMatrix);
-		float pong[] = { 0.05f, 0.05f, -0.05f, 0.05f, -0.05f, -0.05f, 0.05f, 0.05f, -0.05f, -0.05f, 0.05f, -0.05f };
-		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, pong);
-		glEnableVertexAttribArray(program.positionAttribute);
-		glm::mat4 pongTransformMatrix = identityMatrix;
-		pongTransformMatrix = glm::translate(pongTransformMatrix, glm::vec3(pongX, pongY, 0.0f));
-		program.SetModelMatrix(pongTransformMatrix);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		glDisableVertexAttribArray(program.positionAttribute);
-		glDisableVertexAttribArray(program.texCoordAttribute);
+		////PONG
+		pong.Draw(program);
 
-		//Left Paddle
-		program.SetModelMatrix(modelMatrix);
-		program.SetProjectionMatrix(projectionMatrix);
-		program.SetViewMatrix(viewMatrix);
-		float left[] = { 0.01f, 0.1f, -0.01f, 0.1f, -0.01f, -0.1f, 0.01f, 0.1f, -0.01f, -0.1f, 0.01f, -0.1f };
-		glVertexAttribPointer(program.positionAttribute, 2, GL_FLOAT, false, 0, left);
-		glEnableVertexAttribArray(program.positionAttribute);
-
-		glm::mat4 leftTransformMatrix = identityMatrix;
-		leftTransformMatrix = glm::translate(leftTransformMatrix, glm::vec3(-1.6f, leftDisplacement, 0.0f));
-		program.SetModelMatrix(leftTransformMatrix);
-		program.SetColor(248.0 / 255.0f, 187.0 / 255.0f, 208.0 / 255.0f, 1.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		glm::mat4 rightTransformMatrix = identityMatrix;
-		rightTransformMatrix = glm::translate(rightTransformMatrix, glm::vec3(1.6f, rightDisplacement, 0.0f));
-		program.SetModelMatrix(rightTransformMatrix);
-		program.SetColor(178.0 / 255.0f, 235.0 / 255.0f, 2042.0 / 255.0f, 1.0f);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-
-		glDisableVertexAttribArray(program.positionAttribute);
-		glDisableVertexAttribArray(program.texCoordAttribute);
+		//Paddles
+		leftPaddle.Draw(program);
+		rightPaddle.Draw(program);
 
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		float elapsed = ticks - lastFrameTicks;
 		lastFrameTicks = ticks;
-		pongX += (elapsed*pongVelocityX);
-		pongY += (elapsed*pongVelocityY);
 
-		
 		if (rightUp == true) {
-			rightDisplacement += elapsed;
+			rightPaddle.displaceY += elapsed;
 		}
 		if (rightDown == true) {
-			rightDisplacement -= elapsed;
+			rightPaddle.displaceY -= elapsed;
 		}
 		if (leftUp == true) {
-			leftDisplacement += elapsed;
+			leftPaddle.displaceY += elapsed;
 		}
 		if (leftDown == true) {
-			leftDisplacement -= elapsed;
+			leftPaddle.displaceY -= elapsed;
 		}
 
-		if (pongY > 1.0f || pongY < -1.0f) {
-			pongVelocityY *= -1;
-		}
-		if (pongX > 1.777f) {
-			pongVelocityX = 0.0f;
-			pongVelocityY = 0.0f;
-			glClearColor(86.0 / 255.0f, 0.0 / 255.0f, 39.0 / 255.0f, 1.0f);
-		}
-		else if (pongX < -1.777f) {
-			pongVelocityX = 0.0f;
-			pongVelocityY = 0.0f;
-			glClearColor(0.0 / 255.0f, 54.0 / 255.0f, 58.0 / 255.0f, 1.0f);
+		//BOUNCE
+		if (pong.displaceY > 1.0f || pong.displaceY < -1.0f) {
+			pong.velocityY *= -1;
 		}
 
+		float XDistBetweenRightAndPong = (float)abs((rightPaddle.x + rightPaddle.displaceX) - pong.displaceX) - ((rightPaddle.width + pong.width) / 2);
+		float YDistBetweenRightAndPong = (float)abs((rightPaddle.y + rightPaddle.displaceY) - pong.displaceY) - ((rightPaddle.height + pong.height) / 2);
+
+		float XDistBetweenLeftAndPong = (float)abs((leftPaddle.x + leftPaddle.displaceX) - pong.displaceX) - ((leftPaddle.width + pong.width) / 2);
+		float YDistBetweenLeftAndPong = (float)abs((leftPaddle.y + leftPaddle.displaceY) - pong.displaceY) - ((leftPaddle.height + pong.height) / 2);
+		//Check right paddle
+		if (XDistBetweenRightAndPong < 0.0f && YDistBetweenRightAndPong < 0.0f) {
+			pong.velocityX *= -1;
+		}
+		//Check left paddle
+		else if (XDistBetweenLeftAndPong < 0.0f && YDistBetweenLeftAndPong < 0) {
+			pong.velocityX *= -1;
+		}
+
+		//Left Side Wins
+		if (pong.displaceX >= 1.777f) {
+			pong.velocityX = 0.0f;
+			pong.velocityY = 0.0f;
+			leftPaddle.winner = true;
+			//glClearColor(86.0f / 255.0f, 0.0f / 255.0f, 39.0f / 255.0f, 1.0f);
+		}
+		//Right Side Wins
+		else if (pong.displaceX <= -1.777f) {
+			pong.velocityX = 0.0f;
+			pong.velocityY = 0.0f;
+			rightPaddle.winner = true;
+			//glClearColor(0.0f / 255.0f, 54.0f / 255.0f, 58.0f / 255.0f, 1.0f);
+		}
+		pong.update(elapsed);
 		SDL_GL_SwapWindow(displayWindow);
 
     }
