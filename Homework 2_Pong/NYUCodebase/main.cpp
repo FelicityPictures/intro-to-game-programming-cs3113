@@ -43,6 +43,7 @@ public:
 	//float direction_y;
 	Entity(const float& x, const float& y, const float& width, const float& height) :
 		x(x), y(y), width(width), height(height) {
+		//vertices = { 0.5f, 0.5f, -0.5f, 0.5f, -0.5f, -0.5f, 0.5f, 0.5f, -0.5f, -0.5f, 0.5f, -0.5f };
 		float halfWidth = width / 2;
 		float halfHeight = height / 2;
 		vertices[0] = x + halfWidth;
@@ -82,6 +83,9 @@ public:
 	void update(float elapsed) {
 		displaceX += velocityX*elapsed;
 		displaceY += velocityY*elapsed;
+		if (displaceY > (1.0f - height / 2) || displaceY < (-1.0f + height / 2)) {
+			velocityY *= -1;
+		}
 	}
 };
 
@@ -109,10 +113,6 @@ int main(int argc, char *argv[])
 	float lastFrameTicks = 0.0f;
 
     SDL_Event event;
-	float leftDisplacement, rightDisplacement, pongX, pongY, pongVelocityX, pongVelocityY;
-	leftDisplacement = rightDisplacement = 0.0f;
-	pongX = pongY = 0.0f;
-	pongVelocityX = pongVelocityY = 0.75f;
 	bool rightUp, rightDown, leftUp, leftDown;
 	rightUp = rightDown = leftUp = leftDown = false;
 	Entity pong = Entity(0.0f, 0.0f, 0.1f, 0.1f);
@@ -158,10 +158,8 @@ int main(int argc, char *argv[])
         }
         glClear(GL_COLOR_BUFFER_BIT);
 
-		////PONG
+		//DRAW
 		pong.Draw(program);
-
-		//Paddles
 		leftPaddle.Draw(program);
 		rightPaddle.Draw(program);
 
@@ -169,27 +167,21 @@ int main(int argc, char *argv[])
 		float elapsed = ticks - lastFrameTicks;
 		lastFrameTicks = ticks;
 
-		if (rightUp == true) {
+		if (rightUp == true && rightPaddle.displaceY < 1.0f - (rightPaddle.height / 2)) {
 			rightPaddle.displaceY += elapsed;
 		}
-		if (rightDown == true) {
+		if (rightDown == true && rightPaddle.displaceY > -1.0f + (rightPaddle.height / 2)) {
 			rightPaddle.displaceY -= elapsed;
 		}
-		if (leftUp == true) {
+		if (leftUp == true && leftPaddle.displaceY < 1.0f - (leftPaddle.height / 2)) {
 			leftPaddle.displaceY += elapsed;
 		}
-		if (leftDown == true) {
+		if (leftDown == true && leftPaddle.displaceY > -1.0f + (leftPaddle.height / 2)) {
 			leftPaddle.displaceY -= elapsed;
-		}
-
-		//BOUNCE
-		if (pong.displaceY > 1.0f || pong.displaceY < -1.0f) {
-			pong.velocityY *= -1;
 		}
 
 		float XDistBetweenRightAndPong = (float)abs((rightPaddle.x + rightPaddle.displaceX) - pong.displaceX) - ((rightPaddle.width + pong.width) / 2);
 		float YDistBetweenRightAndPong = (float)abs((rightPaddle.y + rightPaddle.displaceY) - pong.displaceY) - ((rightPaddle.height + pong.height) / 2);
-
 		float XDistBetweenLeftAndPong = (float)abs((leftPaddle.x + leftPaddle.displaceX) - pong.displaceX) - ((leftPaddle.width + pong.width) / 2);
 		float YDistBetweenLeftAndPong = (float)abs((leftPaddle.y + leftPaddle.displaceY) - pong.displaceY) - ((leftPaddle.height + pong.height) / 2);
 		//Check right paddle
@@ -217,7 +209,6 @@ int main(int argc, char *argv[])
 		}
 		pong.update(elapsed);
 		SDL_GL_SwapWindow(displayWindow);
-
     }
     
     SDL_Quit();
