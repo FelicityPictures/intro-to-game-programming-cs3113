@@ -21,6 +21,8 @@
 #define MAX_BULLETS 10
 #define SPRITE_COUNT_X 2
 #define SPRITE_COUNT_Y 5
+#define LETTER_COUNT_X 16
+#define LETTER_COUNT_Y 16
 
 SDL_Window* displayWindow;
 
@@ -28,6 +30,14 @@ glm::mat4 projectionMatrix = glm::mat4(1.0f);
 glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 viewMatrix = glm::mat4(1.0f);
 glm::mat4 identityMatrix = glm::mat4(1.0f);
+float defaultVertices[12] = {
+	0.5f, 0.5f,
+	-0.5f, 0.5f,
+	-0.5f, -0.5f,
+	0.5f, 0.5f,
+	-0.5f, -0.5f,
+	0.5f, -0.5f
+};
 
 GLuint LoadTexture(const char *filePath) {
 	int w, h, comp;
@@ -48,6 +58,39 @@ GLuint LoadTexture(const char *filePath) {
 	return retTexture;
 }
 
+void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height) {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+
+	glm::mat4 transformMatrix;
+	float u, v;
+	float spriteWidth = 1.0f / (float)LETTER_COUNT_X;
+	float spriteHeight = 1.0f / (float)LETTER_COUNT_Y;
+	glBindTexture(GL_TEXTURE_2D, texture);
+	for (int i = 0; i < strLength; i++) {
+		u = (float)(str[i] % LETTER_COUNT_X) / (float)LETTER_COUNT_X;
+		v = (float)(str[i] / LETTER_COUNT_X) / (float)LETTER_COUNT_Y;
+		float texCoords[] = {
+		u + spriteWidth, v,
+		u, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v + spriteHeight
+		};
+		glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+		glEnableVertexAttribArray(p.texCoordAttribute);
+		transformMatrix = identityMatrix;
+		transformMatrix = glm::translate(transformMatrix, glm::vec3(x + (height * i), y, 0.0f));
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(height, height, 0.0f));
+		p.SetModelMatrix(transformMatrix);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
 class Entity {
 public:
 	float x;
@@ -55,12 +98,6 @@ public:
 	float width;
 	float height;
 	int spriteIndex;
-	float vertices[12] = { 0.5f, 0.5f,
-						  -0.5f, 0.5f,
-						  -0.5f, -0.5f,
-						   0.5f, 0.5f,
-						  -0.5f, -0.5f,
-						   0.5f, -0.5f };
 	float velocityX = 0.0f;
 	float velocityY = 0.0f;
 	Entity() : x(0.0f), y(0.0f), width(1.0f), height(1.0f) {}
@@ -68,10 +105,11 @@ public:
 		x(x), y(y), width(width), height(height), spriteIndex(spriteIndex) {
 	}
 
-	void Draw(ShaderProgram &p) const {
+	void Draw(ShaderProgram &p, const GLuint &texture) const {
 		p.SetModelMatrix(modelMatrix);
-		glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, vertices);
+		glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 		glEnableVertexAttribArray(p.positionAttribute);
+		glBindTexture(GL_TEXTURE_2D, texture);
 
 		float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 		float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
@@ -113,12 +151,13 @@ int main(int argc, char *argv[])
 
 	glViewport(0, 0, 640, 360);
 
-	//No Textures
+	//Textures
 	ShaderProgram program;
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 	glUseProgram(program.programID);
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"Space Invaders Sprite Sheet.png");
+	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"Letters.png");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -128,6 +167,7 @@ int main(int argc, char *argv[])
 	float elapsedForBullets = 0.0f;
 
     SDL_Event event;
+	int score = 0;
 	Entity laser = Entity(0.0f, -0.9f, 0.2f, 0.2f, 8);
 	Entity aliens[NUMBER_OF_ALIENS];
 	float alienVelocity = 0.075f;
@@ -185,13 +225,21 @@ int main(int argc, char *argv[])
 		lastFrameTicks = ticks;
 
 		//DRAW THINGS
-		laser.Draw(program);
+		laser.Draw(program, spriteSheet);
 		for (int i = 0; i < currentNumberOfAliens; i++) {
-			aliens[i].Draw(program);
+			aliens[i].Draw(program, spriteSheet);
 		}
 		for (int i = 0; i < currentNumberOfBullets; i++) {
-			bullets[i].Draw(program);
+			bullets[i].Draw(program, spriteSheet);
 		}
+		char text[] = "Score 0000";
+		int temporaryScore = score;
+		for (int i = 0; i < 4; i++) {
+			text[9-i] = '0' + (temporaryScore % 10);
+			temporaryScore = floor(temporaryScore / 10);
+		}
+		drawText(program, textSheet, text, 10, -1.7f, 0.9f, 0.1f);
+		//drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height) {
 
 		//COLLISION AND CLEANUP CALCULATION
 		for (int i = 0; i < currentNumberOfBullets; i++) {
@@ -208,6 +256,7 @@ int main(int argc, char *argv[])
 						currentNumberOfBullets--;
 						aliens[m] = aliens[currentNumberOfAliens - 1];
 						currentNumberOfAliens--;
+						score += 5;
 						break;
 					}
 				}
@@ -216,6 +265,12 @@ int main(int argc, char *argv[])
 
 		//CALCULATE MOVEMENT
 		if (elapsedForAliens >= 1.0f) {
+			if (leftmostAlien > -0.2f || leftmostAlien < -1.6f) {
+				for (int i = 0; i < currentNumberOfAliens; i++) {
+					aliens[i].y -= 0.2f;
+				}
+				alienVelocity *= -1;
+			}
 			for (int i = 0; i < currentNumberOfAliens; i++) {
 				aliens[i].x += (alienVelocity * elapsedForAliens);
 				if (aliens[i].spriteIndex % 2 == 0) {
@@ -227,12 +282,6 @@ int main(int argc, char *argv[])
 			}
 			leftmostAlien += (alienVelocity * elapsedForAliens);
 			elapsedForAliens = 0.0f;
-			if (leftmostAlien > -0.2f || leftmostAlien < -1.6f) {
-				for (int i = 0; i < currentNumberOfAliens; i++) {
-					aliens[i].y -= 0.2f;
-				}
-				alienVelocity *= -1;
-			}
 		}
 		
 		if (leftKeyDown) {
