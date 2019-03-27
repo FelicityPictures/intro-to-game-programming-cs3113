@@ -18,6 +18,7 @@
 
 GLuint LoadTexture(const char *filePath);
 void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height);
+enum GameMode { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
 
 class Entity {
 public:
@@ -48,12 +49,11 @@ public:
 	float leftmostAlien = -1.6f;
 	float elapsedForAliens = 0.0f;
 	float elapsedForBullets = 0.0f;
-	//static bool keyDowns[3];
 	bool keyDowns[3];
 	//left, right, space
 
 	GameState();
-	void RenderGame();
+	void RenderGame(int mode);
 	void UpdateGame(float elapsed);
 	void ProcessInput(float elapsed);
 };

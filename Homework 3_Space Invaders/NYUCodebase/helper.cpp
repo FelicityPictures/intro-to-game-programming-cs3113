@@ -76,6 +76,8 @@ void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
+//enum GameMode { STATE_MAIN_MENU, STATE_GAME_LEVEL, STATE_GAME_OVER };
+
 Entity::Entity() : x(0.0f), y(0.0f), width(1.0f), height(1.0f) {}
 Entity::Entity(const float& x, const float& y, const float& width, const float& height, int spriteIndex) :
 		x(x), y(y), width(width), height(height), spriteIndex(spriteIndex) {
@@ -122,43 +124,47 @@ GameState::GameState() {
 	for (int i = 0; i < NUMBER_OF_ALIENS; i++) {
 		float newX = -1.5f + (0.2f * (i % 10));
 		float newY = 0.8f - (0.2f * floor(i / 10.0f));
-		enemies[i] = Entity(newX, newY, 0.17f, 0.17f, (int)floor(i / SPRITE_COUNT_Y));
+		int spriteIndex = 2*(int)floor(i / 10);
+		enemies[i] = Entity(newX, newY, 0.17f, 0.17f, spriteIndex);
 		enemies[i].velocityX = 0.075f;
 		enemies[i].velocityY = -0.2f;
 	}
 }
 
-void GameState::RenderGame() {
-	// render all the entities in the game
-	// render score and other UI elements
-	//DRAW THINGS
-	player.Draw(program, spriteSheet);
-	for (int i = 0; i < currentNumberOfAliens; i++) {
-		enemies[i].Draw(program, spriteSheet);
+void GameState::RenderGame(int mode) {
+	switch (mode) {
+		case GameMode::STATE_MAIN_MENU:
+			drawText(program, textSheet, "Space Invaders", 14, -1.625f, 0.0f, 0.25f);
+			drawText(program, textSheet, "Press space to begin.", 21, -1.0f, -0.5f, 0.1f);
+		break;
+		case GameMode::STATE_GAME_LEVEL:
+			//DRAW THINGS
+			player.Draw(program, spriteSheet);
+			for (int i = 0; i < currentNumberOfAliens; i++) {
+				enemies[i].Draw(program, spriteSheet);
+			}
+			for (int i = 0; i < currentNumberOfBullets; i++) {
+				bullets[i].Draw(program, spriteSheet);
+			}
+			char text[] = "Score 0000";
+			int temporaryScore = score;
+			for (int i = 0; i < 4; i++) {
+				text[9 - i] = '0' + (temporaryScore % 10);
+				temporaryScore = floor(temporaryScore / 10);
+			}
+			drawText(program, textSheet, text, 10, -1.7f, 0.9f, 0.1f);
+		break;
 	}
-	for (int i = 0; i < currentNumberOfBullets; i++) {
-		bullets[i].Draw(program, spriteSheet);
-	}
-	char text[] = "Score 0000";
-	int temporaryScore = score;
-	for (int i = 0; i < 4; i++) {
-		text[9 - i] = '0' + (temporaryScore % 10);
-		temporaryScore = floor(temporaryScore / 10);
-	}
-	drawText(program, textSheet, text, 10, -1.7f, 0.9f, 0.1f);
 }
 void GameState::UpdateGame(float elapsed) {
 	//move aliens
 	elapsedForAliens += elapsed;
 	if (elapsedForAliens >= 1.0f) {
-		if (leftmostAlien > -0.2f || leftmostAlien < -1.6f) {
-			for (int i = 0; i < currentNumberOfAliens; i++) {
-				//enemies[i].y += -0.2f;
+		for (int i = 0; i < currentNumberOfAliens; i++) {
+			if (leftmostAlien > -0.2f || leftmostAlien < -1.6f) {
 				enemies[i].y += enemies[i].velocityY;
 				enemies[i].velocityX *= -1;
 			}
-		}
-		for (int i = 0; i < currentNumberOfAliens; i++) {
 			enemies[i].x += (enemies[i].velocityX * elapsedForAliens);
 			if (enemies[i].spriteIndex % 2 == 0) {
 				enemies[i].spriteIndex++;
@@ -198,10 +204,10 @@ void GameState::UpdateGame(float elapsed) {
 	ProcessInput(elapsed);
 }
 void GameState::ProcessInput(float elapsed) {
-	if (keyDowns[0]) {
+	if (keyDowns[0] && player.x > -1.777f + (player.width / 2)) {
 		player.x -= (player.velocityX * elapsed);
 	}
-	if (keyDowns[1]) {
+	if (keyDowns[1] && player.x < 1.777f - (player.width / 2)) {
 		player.x += (player.velocityX * elapsed);
 	}
 	if (keyDowns[2] && elapsedForBullets >= 0.5f) {
