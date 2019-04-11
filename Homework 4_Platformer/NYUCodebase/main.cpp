@@ -26,23 +26,24 @@ using namespace std;
 
 #define LEVEL_HEIGHT 6
 #define LEVEL_WIDTH 18
-#define TILE_SIZE 16
-
-//background color: 10, 152, 172
+#define TILE_SIZE 0.333
+#define FIXED_TIMESTEP 0.0166666f
 
 SDL_Window* displayWindow;
 glm::mat4 projectionMatrix = glm::mat4(1.0f);
 glm::mat4 viewMatrix = glm::mat4(1.0f);
 int mapWidth, mapHeight;
 unsigned char** levelData;
-//unsigned int levelData[LEVEL_HEIGHT][LEVEL_WIDTH];
 vector<Entity> immovableBlocks;
+Entity player;
 
 void placeEntity(string type, float placeX, float placeY) {
 	if (type == "blocks") {
-		//Entity(const float& x, const float& y, bool isStatic, int spriteIndex);
-		//Entity newBlock = Entity(placeX, placeY,);
-		//immovableBlocks.push_back(newBlock);
+		Entity newBlock = Entity(placeX, placeY, true, 6);
+		immovableBlocks.push_back(newBlock);
+	}
+	else if (type == "player") {
+		player = Entity(placeX, placeY, false, 80);
 	}
 	return;
 }
@@ -122,8 +123,10 @@ bool readEntityData(ifstream &stream) {
 			getline(lineStream, xPosition, ',');
 			getline(lineStream, yPosition, ',');
 			float placeX = atoi(xPosition.c_str())*TILE_SIZE;
-			float placeY = atoi(yPosition.c_str())*-TILE_SIZE;
-			//placeEntity(type, placeX, placeY);
+			float placeY = (atoi(yPosition.c_str())-1)*TILE_SIZE;
+			placeX = -1.777f + (TILE_SIZE / 2) + placeX;
+			placeY = 1.0f - (TILE_SIZE / 2) - placeY;
+			placeEntity(type, placeX, placeY);
 		}
 	}
 	return true;
@@ -146,13 +149,11 @@ int main(int argc, char *argv[]){
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	glUseProgram(program.programID);
-	float lastFrameTicks = 0.0f;
-	float ticks, elapsed;
-	vector<Entity> test;
+	float elapsed = 0.0f;
+	float accumulator = 0.0f;
 
     SDL_Event event;
     bool done = false;
-
 
 	program.SetProjectionMatrix(projectionMatrix);
 	program.SetViewMatrix(viewMatrix);
@@ -176,16 +177,7 @@ int main(int argc, char *argv[]){
 		}
 	}
 	//==================================================================================
-	//for (int i = 0; i < mapHeight; i++) {
-	//	for (int m = 0; m < mapWidth; m++) {
-	//		if (levelData[i][m] != 0) {
-	//			//test.push_back(Entity(0,0, 0.1f, 0.1f, 1));
-	//			test.push_back(Entity(-1.777 + (0.1*m), 1.0 - (0.1f*i), 0.1f, 0.1f, 0));
-	//		}
-	//	}
-	//}
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites.png");
-	Entity testingSprite = Entity(0, 0, true, 1);
     while (!done) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
@@ -196,18 +188,34 @@ int main(int argc, char *argv[]){
         }
 		glClear(GL_COLOR_BUFFER_BIT);
 
-
-		//DRAW WITH GAME STATE
-		for (int i = 0; i < test.size(); i++) {
-			test[i].Draw(program, spriteSheet);
+		for (int y = 0; y < mapHeight; y++) {
+			for (int x = 0; x < mapWidth; x++) {
+				if (levelData[y][x] == (unsigned char)atoi("1")) {
+					drawStatic(program, spriteSheet, x, y, 1);
+				}
+			}
 		}
+		//DRAW WITH GAME STATE
+		for (int i = 0; i < immovableBlocks.size(); i++) {
+			immovableBlocks[i].Draw(program, spriteSheet);
+		}
+		player.Draw(program, spriteSheet);
 
 		//TIMING
-		ticks = (float)SDL_GetTicks() / 1000.0f;
-		elapsed = ticks - lastFrameTicks;
-		lastFrameTicks = ticks;
+		elapsed += accumulator;
+		if (elapsed < FIXED_TIMESTEP) {
+			accumulator = elapsed;
+			//continue;
+		}
+		while (elapsed >= FIXED_TIMESTEP) {
+			//Update(FIXED_TIMESTEP);
+			elapsed -= FIXED_TIMESTEP;
+		}
+		accumulator = elapsed;
+
 		//UPDATE GAME
 
+		glClearColor(10.0f / 255.0f, 152.0f / 255.0f, 172.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
     }
     
