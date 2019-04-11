@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.2" tiledversion="1.2.3" orientation="orthogonal" renderorder="right-down" width="18" height="6" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="9">
+ <tileset firstgid="1" source="MySprites.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="18" height="6">
+  <data encoding="base64">
+   AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAIAAAASAAAAEgAAAAIAAAACAAAAAgAAAAIAAAASAAAAEgAAAAIAAAASAAAAAgAAAAIAAAACAAAAAgAAAAIAAAACAAAA
+  </data>
+ </layer>
+ <objectgroup id="5" name="ObjectsLayer">
+  <object id="8" type="player" gid="82" x="32.3636" y="80.7273" width="16" height="16"/>
+  <object id="5" name="block 2" type="blocks" gid="7" x="96.0313" y="80.0625" width="16" height="16"/>
+  <object id="6" name="block 1" type="blocks" gid="7" x="112.156" y="80.0313" width="16" height="16"/>
+ </objectgroup>
+</map>

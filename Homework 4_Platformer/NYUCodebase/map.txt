@@ -1,0 +1,35 @@
+[header]
+width=18
+height=6
+tilewidth=16
+tileheight=16
+orientation=orthogonal
+background_color=0,0,0,255
+
+[tilesets]
+tileset=../../../game-programming-class/assets/sprite_sheets/arne_sprites.png,16,16,0,0
+
+[layer]
+type=Tile Layer 1
+data=
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,113,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+2,2,18,18,2,2,2,2,18,18,2,18,2,2,2,2,2,2
+
+[ObjectsLayer]
+type=player
+location=2,5,1,1
+
+[ObjectsLayer]
+# block 2
+type=blocks
+location=6,5,1,1
+
+[ObjectsLayer]
+# block 1
+type=blocks
+location=7,5,1,1
+
