@@ -151,6 +151,12 @@ int main(int argc, char *argv[]){
 	glUseProgram(program.programID);
 	float elapsed = 0.0f;
 	float accumulator = 0.0f;
+	float velocity_x = 0.0f;
+	float velocity_y = 0.0f;
+	float acceleration_x = 0.01f;
+	float gravity = -0.0098f;
+	float friction_x = 0.1f;
+	float friction_y = 0.0f;
 
     SDL_Event event;
     bool done = false;
@@ -178,12 +184,16 @@ int main(int argc, char *argv[]){
 	}
 	//==================================================================================
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites.png");
-    while (!done) {
+	const Uint8 *keys = SDL_GetKeyboardState(NULL);
+	while (!done) {
         while (SDL_PollEvent(&event)) {
-            if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
-                done = true;
+			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
+				done = true;
 			}
-			if (event.type == SDL_KEYDOWN) {
+			else if (event.type == SDL_KEYUP) {
+				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+					velocity_y = 0.05f;
+				}
 			}
         }
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -209,11 +219,57 @@ int main(int argc, char *argv[]){
 		}
 		while (elapsed >= FIXED_TIMESTEP) {
 			//Update(FIXED_TIMESTEP);
+
 			elapsed -= FIXED_TIMESTEP;
 		}
 		accumulator = elapsed;
 
 		//UPDATE GAME
+		if (keys[SDL_SCANCODE_LEFT]) {
+			acceleration_x = 0.01f;
+			velocity_x -= acceleration_x * FIXED_TIMESTEP;
+		}
+		else if (keys[SDL_SCANCODE_RIGHT]) {
+			// go right!
+			acceleration_x = 0.01f;
+			velocity_x += acceleration_x * FIXED_TIMESTEP;
+		}
+
+		player.y += velocity_y * FIXED_TIMESTEP;
+		player.x += velocity_x * FIXED_TIMESTEP;
+
+		velocity_x = lerp(velocity_x, 0.0f, FIXED_TIMESTEP * friction_x);
+		if (velocity_y > 0.0f) {
+			velocity_y += gravity * FIXED_TIMESTEP;
+		}
+
+		//movement and collision detection
+		//between blocks and player
+		for (int i = 0; i < immovableBlocks.size(); i++) {
+			float XDistBetweenBlockAndPlayer = (float)abs(immovableBlocks[i].x - player.x) - ((immovableBlocks[i].width + player.width) / 2);
+			float YDistBetweenBlockAndPlayer = (float)abs(immovableBlocks[i].y - player.y) - ((immovableBlocks[i].height + player.height) / 2);
+			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
+				float penetrationX = fabs((immovableBlocks[i].x - player.x) - (player.width / 2) - (immovableBlocks[i].width / 2));
+				float penetrationY = fabs((immovableBlocks[i].y - player.y) - (player.height / 2) - (immovableBlocks[i].height / 2));
+				if (velocity_x > 0.0f && penetrationX < penetrationY) {
+					if (immovableBlocks[i].x > player.x) {
+						player.x -= penetrationX + 0.00001f;
+					}
+					else {
+						player.x += penetrationX + 0.00001f;
+					}
+					velocity_x = 0.0f;
+					acceleration_x = 0.0f;
+				}
+				else if (velocity_y > 0.0f && penetrationY < penetrationX) {
+					if (immovableBlocks[i].y < player.x) {
+						player.y += penetrationY + 0.00001f;
+					}
+					velocity_y = 0.0f;
+					//acceleration_y = 0.0f;
+				}
+			}
+		}
 
 		glClearColor(10.0f / 255.0f, 152.0f / 255.0f, 172.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

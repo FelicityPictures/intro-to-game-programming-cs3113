@@ -10,6 +10,8 @@
 #define LETTER_COUNT_Y 16
 #define SPRITE_COUNT_X 16
 #define SPRITE_COUNT_Y 8
+#define TILE_SIZE 0.333
+float tile_size = 0.333f;
 
 glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 identityMatrix = glm::mat4(1.0f);
@@ -39,9 +41,9 @@ GLuint LoadTexture(const char *filePath) {
 	return retTexture;
 }
 
-Entity::Entity() : x(0.0f), y(0.0f), width(1.0f), height(1.0f) {}
+Entity::Entity() : x(0.0f), y(0.0f), width(tile_size), height(tile_size) {}
 Entity::Entity(float x, float y, bool isStatic, int spriteIndex) :
-		x(x), y(y), isStatic(isStatic), spriteIndex(spriteIndex) {
+		x(x), y(y), isStatic(isStatic), spriteIndex(spriteIndex), width(tile_size), height(tile_size) {
 	}
 
 void Entity::Draw(ShaderProgram &p, const GLuint &texture) const {
@@ -66,9 +68,8 @@ void Entity::Draw(ShaderProgram &p, const GLuint &texture) const {
 	glEnableVertexAttribArray(p.texCoordAttribute);
 
 	glm::mat4 transformMatrix = identityMatrix;
-	//transformMatrix = glm::translate(transformMatrix, glm::vec3(-1.777 + (0.333 / 2) + (0.333*x), 1.0 - (0.333 / 2) - (0.333*y), 0.0f));
 	transformMatrix = glm::translate(transformMatrix, glm::vec3(x, y, 0.0f));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(0.333, 0.333, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(width, height, 0.0f));
 	p.SetModelMatrix(transformMatrix);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(p.positionAttribute);
@@ -97,10 +98,14 @@ void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int sprit
 	glEnableVertexAttribArray(p.texCoordAttribute);
 
 	glm::mat4 transformMatrix = identityMatrix;
-	transformMatrix = glm::translate(transformMatrix, glm::vec3(-1.777 + (0.333 / 2) + (0.333*x), 1.0 - (0.333 / 2) - (0.333*y), 0.0f));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(0.333, 0.333, 0.0f));
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(-1.777 + (TILE_SIZE / 2) + (TILE_SIZE*x), 1.0 - (TILE_SIZE / 2) - (TILE_SIZE*y), 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 	p.SetModelMatrix(transformMatrix);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(p.positionAttribute);
 	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
+float lerp(float v0, float v1, float t) {
+	return (1.0 - t)*v0 + t * v1;
 }

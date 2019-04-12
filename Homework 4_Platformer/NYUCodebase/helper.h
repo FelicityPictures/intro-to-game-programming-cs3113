@@ -20,8 +20,8 @@ class Entity {
 public:
 	float x;
 	float y;
-	int width;
-	int height;
+	float width;
+	float height;
 	int spriteIndex;
 	float velocityX;
 	float velocityY;
@@ -34,3 +34,5 @@ public:
 };
 
 void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int spriteIndex);
+
+float lerp(float v0, float v1, float t);
