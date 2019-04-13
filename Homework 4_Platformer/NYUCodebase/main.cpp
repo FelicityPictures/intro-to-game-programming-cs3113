@@ -26,7 +26,7 @@ using namespace std;
 
 #define LEVEL_HEIGHT 6
 #define LEVEL_WIDTH 18
-#define TILE_SIZE 0.333
+#define TILE_SIZE 0.333f
 #define FIXED_TIMESTEP 0.0166666f
 
 SDL_Window* displayWindow;
@@ -47,6 +47,7 @@ void placeEntity(string type, float placeX, float placeY) {
 	}
 	return;
 }
+
 
 bool readHeader(ifstream &stream) {
 	string line;
@@ -76,6 +77,7 @@ bool readHeader(ifstream &stream) {
 		return true;
 	}
 }
+
 bool readLayerData(ifstream &stream) {
 	string line;
 	while (getline(stream, line)) {
@@ -154,7 +156,7 @@ int main(int argc, char *argv[]){
 	float velocity_x = 0.0f;
 	float velocity_y = 0.0f;
 	float acceleration_x = 0.01f;
-	float gravity = -0.0098f;
+	float gravity = 0.0f;
 	float friction_x = 0.1f;
 	float friction_y = 0.0f;
 
@@ -190,9 +192,10 @@ int main(int argc, char *argv[]){
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 				done = true;
 			}
-			else if (event.type == SDL_KEYUP) {
+			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-					velocity_y = 0.05f;
+					velocity_y = 0.5f;
+					gravity = 0.098f;
 				}
 			}
         }
@@ -206,7 +209,7 @@ int main(int argc, char *argv[]){
 			}
 		}
 		//DRAW WITH GAME STATE
-		for (int i = 0; i < immovableBlocks.size(); i++) {
+		for (size_t i = 0; i < immovableBlocks.size(); i++) {
 			immovableBlocks[i].Draw(program, spriteSheet);
 		}
 		player.Draw(program, spriteSheet);
@@ -224,6 +227,7 @@ int main(int argc, char *argv[]){
 		}
 		accumulator = elapsed;
 
+
 		//UPDATE GAME
 		if (keys[SDL_SCANCODE_LEFT]) {
 			acceleration_x = 0.01f;
@@ -234,42 +238,54 @@ int main(int argc, char *argv[]){
 			acceleration_x = 0.01f;
 			velocity_x += acceleration_x * FIXED_TIMESTEP;
 		}
-
-		player.y += velocity_y * FIXED_TIMESTEP;
 		player.x += velocity_x * FIXED_TIMESTEP;
-
+		for (const Entity& block : immovableBlocks) {
+			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
+			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
+			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
+				float penetrationX = fabs((block.x - player.x) - (player.width / 2) - (block.width / 2));
+				if (block.x > player.x) {
+					player.x -= penetrationX + 0.00001f;
+				}
+				else {
+					player.x += penetrationX + 0.00001f;
+				}
+				velocity_x = 0.0f;
+				acceleration_x = 0.0f;
+			}
+		}
 		velocity_x = lerp(velocity_x, 0.0f, FIXED_TIMESTEP * friction_x);
-		if (velocity_y > 0.0f) {
-			velocity_y += gravity * FIXED_TIMESTEP;
+
+		velocity_y -= gravity * FIXED_TIMESTEP;
+		player.y += velocity_y * FIXED_TIMESTEP;
+		for (const Entity& block : immovableBlocks) {
+			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
+			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
+			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
+				float penetrationX = fabs((block.x - player.x) - (player.width / 2) - (block.width / 2));
+				float penetrationY = fabs((block.y - player.y) - (player.height / 2) - (block.height / 2));
+				if (block.y > player.y) {
+					//player.y -= penetrationY + 0.00001f;
+				}
+				else {
+					//player.y += penetrationY + 0.00001f;
+				}
+				velocity_y = 0.0f;
+				gravity = 0.0f;
+			}
 		}
 
 		//movement and collision detection
 		//between blocks and player
-		for (int i = 0; i < immovableBlocks.size(); i++) {
-			float XDistBetweenBlockAndPlayer = (float)abs(immovableBlocks[i].x - player.x) - ((immovableBlocks[i].width + player.width) / 2);
-			float YDistBetweenBlockAndPlayer = (float)abs(immovableBlocks[i].y - player.y) - ((immovableBlocks[i].height + player.height) / 2);
-			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
-				float penetrationX = fabs((immovableBlocks[i].x - player.x) - (player.width / 2) - (immovableBlocks[i].width / 2));
-				float penetrationY = fabs((immovableBlocks[i].y - player.y) - (player.height / 2) - (immovableBlocks[i].height / 2));
-				if (velocity_x > 0.0f && penetrationX < penetrationY) {
-					if (immovableBlocks[i].x > player.x) {
-						player.x -= penetrationX + 0.00001f;
-					}
-					else {
-						player.x += penetrationX + 0.00001f;
-					}
-					velocity_x = 0.0f;
-					acceleration_x = 0.0f;
-				}
-				else if (velocity_y > 0.0f && penetrationY < penetrationX) {
-					if (immovableBlocks[i].y < player.x) {
-						player.y += penetrationY + 0.00001f;
-					}
-					velocity_y = 0.0f;
-					//acceleration_y = 0.0f;
-				}
-			}
-		}
+		// TODO: check X velocity
+		// - apply x_velocity
+		// - do the collision check
+		// TODO: then apply friction (if still in motion)
+		// TODO: then apply acceleration (prob same step as friction because they're both vectors)
+		// TODO: first apply Y velocity
+		// -apply y_velocity
+		// ```player.y += velocity_y * FIXED_TIMESTEP;```
+		// TODO: then check FULL box collision on all entities
 
 		glClearColor(10.0f / 255.0f, 152.0f / 255.0f, 172.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

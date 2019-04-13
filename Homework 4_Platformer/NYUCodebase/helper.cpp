@@ -76,6 +76,21 @@ void Entity::Draw(ShaderProgram &p, const GLuint &texture) const {
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
+//void Entity::immovableCollision(const vector<Entity>& immovableBlocks) {
+//	float xdist, ydist, xpen, ypen, xthresh, ythresh;
+//	for (const Entity& block : immovableBlocks) {
+//		xthresh = (block.width + width) / 2.0f;
+//		ythresh = (block.height + height) / 2.0f;
+//		xdist = fabs(block.x - x) - xthresh;
+//		ydist = fabs(block.y - y) - ythresh;
+//		if (xdist < 0.0f && ydist < 0.0f) {
+//			xpen = fabs((block.x - x) - xthresh);
+//			ypen = fabs((block.y - y) - ythresh);
+//			return;
+//		}
+//	}
+//}
+
 void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int spriteIndex) {
 	p.SetModelMatrix(modelMatrix);
 	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
@@ -107,5 +122,5 @@ void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int sprit
 }
 
 float lerp(float v0, float v1, float t) {
-	return (1.0 - t)*v0 + t * v1;
+	return (1.0f - t)*v0 + t * v1;
 }
