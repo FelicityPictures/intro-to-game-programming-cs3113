@@ -27,11 +27,13 @@ public:
 	float velocityX;
 	float velocityY;
 	bool isStatic;
+	bool left = false;
 
 	Entity();
 	Entity(float x, float y, bool isStatic, int spriteIndex);
 
 	void Draw(ShaderProgram &p, const GLuint &texture) const;
+	void Entity::automove(float timestep, float timesElapsed);
 };
 
 void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int spriteIndex);

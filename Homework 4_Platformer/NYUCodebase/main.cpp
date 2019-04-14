@@ -36,6 +36,7 @@ int mapWidth, mapHeight;
 unsigned char** levelData;
 vector<Entity> immovableBlocks;
 Entity player;
+Entity enemy;
 
 void placeEntity(string type, float placeX, float placeY) {
 	if (type == "blocks") {
@@ -48,6 +49,10 @@ void placeEntity(string type, float placeX, float placeY) {
 	}
 	else if (type == "player") {
 		player = Entity(placeX, placeY + 0.5f, false, 80);
+	}
+	else if (type == "enemy") {
+		enemy = Entity(placeX, placeY, false, 27);
+		enemy.velocityX = 0.05f;
 	}
 	return;
 }
@@ -210,8 +215,8 @@ int main(int argc, char *argv[]){
 
 		for (int y = 0; y < mapHeight; y++) {
 			for (int x = 0; x < mapWidth; x++) {
-				if (levelData[y][x] == (unsigned char)atoi("1")) {
-					drawStatic(program, spriteSheet, x, y, 1);
+				if (levelData[y][x] != (unsigned char)atoi("0")) {
+					drawStatic(program, spriteSheet, x, y, levelData[y][x]);
 				}
 			}
 		}
@@ -220,6 +225,7 @@ int main(int argc, char *argv[]){
 			immovableBlocks[i].Draw(program, spriteSheet);
 		}
 		player.Draw(program, spriteSheet);
+		enemy.Draw(program, spriteSheet);
 
 		//TIMING
 		elapsed += accumulator;
@@ -236,18 +242,22 @@ int main(int argc, char *argv[]){
 
 		//UPDATE GAME
 		if (keys[SDL_SCANCODE_LEFT]) {
+			player.left = true;
 			acceleration_x = 0.01f;
 			velocity_x -= acceleration_x * FIXED_TIMESTEP * timestepsElapsed;
 		}
 		else if (keys[SDL_SCANCODE_RIGHT]) {
 			// go right!
+			player.left = false;
 			acceleration_x = 0.01f;
 			velocity_x += acceleration_x * FIXED_TIMESTEP * timestepsElapsed;
 		}
 		player.x += velocity_x * FIXED_TIMESTEP * timestepsElapsed;
-
 		viewMatrix = glm::translate(viewMatrix, glm::vec3(-1*velocity_x*FIXED_TIMESTEP*timestepsElapsed, 0.0f, 0.0f));
 		program.SetViewMatrix(viewMatrix);
+
+		enemy.automove(FIXED_TIMESTEP, timestepsElapsed);
+
 		for (const Entity& block : immovableBlocks) {
 			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
 			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
@@ -262,6 +272,13 @@ int main(int argc, char *argv[]){
 				velocity_x = 0.0f;
 				acceleration_x = 0.0f;
 			}
+		}
+		float XDistEnemyAndPlayer = fabs(enemy.x - player.x) - ((0.111f + player.width) / 2);
+		float YDistEnemyAndPlayer = fabs(enemy.y - player.y) - ((0.111f + player.height) / 2);
+		if (XDistEnemyAndPlayer < 0.0f && YDistEnemyAndPlayer < 0.0f) {
+			velocity_x = 0.0f;
+			velocity_y = 0.0f;
+			player.spriteIndex = 48;
 		}
 		velocity_x = lerp(velocity_x, 0.0f, FIXED_TIMESTEP * friction_x);
 
@@ -280,6 +297,14 @@ int main(int argc, char *argv[]){
 				}
 				velocity_y = 0.0f;
 			}
+		}
+		XDistEnemyAndPlayer = fabs(enemy.x - player.x) - ((0.111f + player.width) / 2);
+		YDistEnemyAndPlayer = fabs(enemy.y - player.y) - ((0.111f + player.height) / 2);
+		if (XDistEnemyAndPlayer < 0.0f && YDistEnemyAndPlayer < 0.0f) {
+			velocity_x = 0.0f;
+			enemy.spriteIndex = 48;
+			enemy.velocityX = 0.0f;
+			enemy.velocityY = 0.1f;
 		}
 
 		timestepsElapsed = 1.0f;

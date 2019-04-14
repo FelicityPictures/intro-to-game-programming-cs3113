@@ -67,11 +67,24 @@ void Entity::Draw(ShaderProgram &p, const GLuint &texture) const {
 
 	glm::mat4 transformMatrix = identityMatrix;
 	transformMatrix = glm::translate(transformMatrix, glm::vec3(x, y, 0.0f));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(width, height, 0.0f));
+	if (left) {
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(-1*width, height, 0.0f));
+	}
+	else {
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(width, height, 0.0f));
+	}
 	p.SetModelMatrix(transformMatrix);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(p.positionAttribute);
 	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
+void Entity::automove(float timestep, float timesElapsed) {
+	x += velocityX * timestep * timesElapsed;
+	//y += velocityY * timestep * timesElapsed;
+	if (x < 2.2f || x > 3.5f) {
+		velocityX *= -1;
+	}
 }
 
 void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int spriteIndex) {

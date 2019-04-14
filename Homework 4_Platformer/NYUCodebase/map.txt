@@ -13,15 +13,11 @@ tileset=../../../game-programming-class/assets/sprite_sheets/arne_sprites.png,16
 type=Tile Layer 1
 data=
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,97,98,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,114,115,116,0,
 0,0,0,0,113,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-
-[ObjectsLayer]
-type=player
-location=2,5,1,1
 
 [ObjectsLayer]
 type=blocks
@@ -106,4 +102,12 @@ location=11,6,1,1
 [ObjectsLayer]
 type=floor
 location=9,6,1,1
+
+[ObjectsLayer]
+type=enemy
+location=13,5,1,1
+
+[ObjectsLayer]
+type=player
+location=2,5,1,1
 
