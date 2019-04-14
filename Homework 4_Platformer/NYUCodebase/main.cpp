@@ -160,6 +160,7 @@ int main(int argc, char *argv[]){
 	//float gravity = 0.0f;
 	float friction_x = 0.1f;
 	float friction_y = 0.0f;
+	float timestepsElapsed = 1.0f;
 
     SDL_Event event;
     bool done = false;
@@ -195,7 +196,7 @@ int main(int argc, char *argv[]){
 			}
 			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-					velocity_y = 0.5f;
+					velocity_y = 0.4f;
 				}
 			}
         }
@@ -221,7 +222,7 @@ int main(int argc, char *argv[]){
 			//continue;
 		}
 		while (elapsed >= FIXED_TIMESTEP) {
-			//Update(FIXED_TIMESTEP);
+			timestepsElapsed++;
 			elapsed -= FIXED_TIMESTEP;
 		}
 		accumulator = elapsed;
@@ -229,15 +230,18 @@ int main(int argc, char *argv[]){
 
 		//UPDATE GAME
 		if (keys[SDL_SCANCODE_LEFT]) {
-			acceleration_x = 0.05f;
-			velocity_x -= acceleration_x * FIXED_TIMESTEP;
+			acceleration_x = 0.01f;
+			velocity_x -= acceleration_x * FIXED_TIMESTEP * timestepsElapsed;
 		}
 		else if (keys[SDL_SCANCODE_RIGHT]) {
 			// go right!
-			acceleration_x = 0.05f;
-			velocity_x += acceleration_x * FIXED_TIMESTEP;
+			acceleration_x = 0.01f;
+			velocity_x += acceleration_x * FIXED_TIMESTEP * timestepsElapsed;
 		}
-		player.x += velocity_x * FIXED_TIMESTEP;
+		player.x += velocity_x * FIXED_TIMESTEP * timestepsElapsed;
+
+		viewMatrix = glm::translate(viewMatrix, glm::vec3(-1*velocity_x*FIXED_TIMESTEP*timestepsElapsed, 0.0f, 0.0f));
+		program.SetViewMatrix(viewMatrix);
 		for (const Entity& block : immovableBlocks) {
 			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
 			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
@@ -255,8 +259,8 @@ int main(int argc, char *argv[]){
 		}
 		velocity_x = lerp(velocity_x, 0.0f, FIXED_TIMESTEP * friction_x);
 
-		velocity_y -= gravity * FIXED_TIMESTEP;
-		player.y += velocity_y * FIXED_TIMESTEP;
+		velocity_y -= gravity * FIXED_TIMESTEP * timestepsElapsed;
+		player.y += velocity_y * FIXED_TIMESTEP * timestepsElapsed;
 		for (const Entity& block : immovableBlocks) {
 			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
 			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
@@ -269,21 +273,10 @@ int main(int argc, char *argv[]){
 					player.y += penetrationY + 0.0000001f;
 				}
 				velocity_y = 0.0f;
-				//gravity = 0.0f;
 			}
 		}
 
-		//movement and collision detection
-		//between blocks and player
-		// TODO: check X velocity
-		// - apply x_velocity
-		// - do the collision check
-		// TODO: then apply friction (if still in motion)
-		// TODO: then apply acceleration (prob same step as friction because they're both vectors)
-		// TODO: first apply Y velocity
-		// -apply y_velocity
-		// ```player.y += velocity_y * FIXED_TIMESTEP;```
-		// TODO: then check FULL box collision on all entities
+		timestepsElapsed = 1.0f;
 
 		glClearColor(10.0f / 255.0f, 152.0f / 255.0f, 172.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
