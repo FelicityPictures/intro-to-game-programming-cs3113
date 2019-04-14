@@ -43,7 +43,7 @@ void placeEntity(string type, float placeX, float placeY) {
 		immovableBlocks.push_back(newBlock);
 	}
 	else if (type == "player") {
-		player = Entity(placeX, placeY, false, 80);
+		player = Entity(placeX, placeY + 0.5f, false, 80);
 	}
 	return;
 }
@@ -156,7 +156,8 @@ int main(int argc, char *argv[]){
 	float velocity_x = 0.0f;
 	float velocity_y = 0.0f;
 	float acceleration_x = 0.01f;
-	float gravity = 0.0f;
+	float gravity = 0.098f;
+	//float gravity = 0.0f;
 	float friction_x = 0.1f;
 	float friction_y = 0.0f;
 
@@ -195,7 +196,6 @@ int main(int argc, char *argv[]){
 			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
 					velocity_y = 0.5f;
-					gravity = 0.098f;
 				}
 			}
         }
@@ -222,7 +222,6 @@ int main(int argc, char *argv[]){
 		}
 		while (elapsed >= FIXED_TIMESTEP) {
 			//Update(FIXED_TIMESTEP);
-
 			elapsed -= FIXED_TIMESTEP;
 		}
 		accumulator = elapsed;
@@ -230,12 +229,12 @@ int main(int argc, char *argv[]){
 
 		//UPDATE GAME
 		if (keys[SDL_SCANCODE_LEFT]) {
-			acceleration_x = 0.01f;
+			acceleration_x = 0.05f;
 			velocity_x -= acceleration_x * FIXED_TIMESTEP;
 		}
 		else if (keys[SDL_SCANCODE_RIGHT]) {
 			// go right!
-			acceleration_x = 0.01f;
+			acceleration_x = 0.05f;
 			velocity_x += acceleration_x * FIXED_TIMESTEP;
 		}
 		player.x += velocity_x * FIXED_TIMESTEP;
@@ -243,7 +242,7 @@ int main(int argc, char *argv[]){
 			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
 			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
 			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
-				float penetrationX = fabs((block.x - player.x) - (player.width / 2) - (block.width / 2));
+				float penetrationX = fabs(fabs(block.x - player.x) - (player.width / 2) - (block.width / 2));
 				if (block.x > player.x) {
 					player.x -= penetrationX + 0.00001f;
 				}
@@ -262,16 +261,15 @@ int main(int argc, char *argv[]){
 			float XDistBetweenBlockAndPlayer = fabs(block.x - player.x) - ((block.width + player.width) / 2);
 			float YDistBetweenBlockAndPlayer = fabs(block.y - player.y) - ((block.height + player.height) / 2);
 			if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
-				float penetrationX = fabs((block.x - player.x) - (player.width / 2) - (block.width / 2));
-				float penetrationY = fabs((block.y - player.y) - (player.height / 2) - (block.height / 2));
+				float penetrationY = fabs(fabs(block.y - player.y) - (player.height / 2) - (block.height / 2));
 				if (block.y > player.y) {
-					//player.y -= penetrationY + 0.00001f;
+					player.y -= penetrationY + 0.0000001f;
 				}
 				else {
-					//player.y += penetrationY + 0.00001f;
+					player.y += penetrationY + 0.0000001f;
 				}
 				velocity_y = 0.0f;
-				gravity = 0.0f;
+				//gravity = 0.0f;
 			}
 		}
 
