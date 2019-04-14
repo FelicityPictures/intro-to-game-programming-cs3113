@@ -42,6 +42,10 @@ void placeEntity(string type, float placeX, float placeY) {
 		Entity newBlock = Entity(placeX, placeY, true, 6);
 		immovableBlocks.push_back(newBlock);
 	}
+	else if (type == "floor") {
+		Entity newBlock = Entity(placeX, placeY, true, 1);
+		immovableBlocks.push_back(newBlock);
+	}
 	else if (type == "player") {
 		player = Entity(placeX, placeY + 0.5f, false, 80);
 	}
@@ -147,7 +151,7 @@ int main(int argc, char *argv[]){
 	glViewport(0, 0, 640, 360);
 	//No Textures
 	ShaderProgram program;
-	program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
+	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	glUseProgram(program.programID);
@@ -188,6 +192,8 @@ int main(int argc, char *argv[]){
 	}
 	//==================================================================================
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites.png");
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	while (!done) {
         while (SDL_PollEvent(&event)) {

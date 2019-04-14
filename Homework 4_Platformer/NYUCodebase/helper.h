@@ -32,7 +32,6 @@ public:
 	Entity(float x, float y, bool isStatic, int spriteIndex);
 
 	void Draw(ShaderProgram &p, const GLuint &texture) const;
-	//void immovableCollision(const std::vector<Entity>& immovableBlocks);
 };
 
 void drawStatic(ShaderProgram &p, const GLuint &texture, int x, int y, int spriteIndex);

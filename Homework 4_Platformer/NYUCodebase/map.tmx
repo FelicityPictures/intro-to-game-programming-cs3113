@@ -10,24 +10,24 @@
   <object id="8" type="player" gid="82" x="32" y="80" width="16" height="16"/>
   <object id="5" type="blocks" gid="7" x="96" y="80" width="16" height="16"/>
   <object id="6" type="blocks" gid="7" x="112" y="80" width="16" height="16"/>
-  <object id="26" type="blocks" gid="2" x="256" y="96" width="16" height="16"/>
-  <object id="27" type="blocks" gid="2" x="272" y="96" width="16" height="16"/>
-  <object id="29" type="blocks" gid="2" x="0" y="96" width="16" height="16"/>
-  <object id="30" type="blocks" gid="2" x="112" y="96" width="16" height="16"/>
-  <object id="31" type="blocks" gid="2" x="16" y="96" width="16" height="16"/>
-  <object id="32" type="blocks" gid="2" x="32" y="96" width="16" height="16"/>
-  <object id="33" type="blocks" gid="2" x="48" y="96" width="16" height="16"/>
-  <object id="34" type="blocks" gid="2" x="64" y="96" width="16" height="16"/>
-  <object id="35" type="blocks" gid="2" x="80" y="96" width="16" height="16"/>
-  <object id="36" type="blocks" gid="2" x="96" y="96" width="16" height="16"/>
-  <object id="38" type="blocks" gid="2" x="128" y="96" width="16" height="16"/>
-  <object id="39" type="blocks" gid="2" x="176" y="96" width="16" height="16"/>
-  <object id="41" type="blocks" gid="2" x="192" y="96" width="16" height="16"/>
-  <object id="42" type="blocks" gid="2" x="208" y="96" width="16" height="16"/>
-  <object id="43" type="blocks" gid="2" x="224" y="96" width="16" height="16"/>
-  <object id="44" type="blocks" gid="2" x="240" y="96" width="16" height="16"/>
-  <object id="45" type="blocks" gid="3" x="128" y="96" width="16" height="16"/>
-  <object id="46" type="blocks" gid="1" x="176" y="96" width="16" height="16"/>
-  <object id="47" type="blocks" gid="2" x="144" y="96" width="16" height="16"/>
+  <object id="26" type="floor" gid="2" x="256" y="96" width="16" height="16"/>
+  <object id="27" type="floor" gid="2" x="272" y="96" width="16" height="16"/>
+  <object id="29" type="floor" gid="2" x="0" y="96" width="16" height="16"/>
+  <object id="30" type="floor" gid="2" x="112" y="96" width="16" height="16"/>
+  <object id="31" type="floor" gid="2" x="16" y="96" width="16" height="16"/>
+  <object id="32" type="floor" gid="2" x="32" y="96" width="16" height="16"/>
+  <object id="33" type="floor" gid="2" x="48" y="96" width="16" height="16"/>
+  <object id="34" type="floor" gid="2" x="64" y="96" width="16" height="16"/>
+  <object id="35" type="floor" gid="2" x="80" y="96" width="16" height="16"/>
+  <object id="36" type="floor" gid="2" x="96" y="96" width="16" height="16"/>
+  <object id="38" type="floor" gid="2" x="128" y="96" width="16" height="16"/>
+  <object id="39" type="floor" gid="2" x="176" y="96" width="16" height="16"/>
+  <object id="41" type="floor" gid="2" x="192" y="96" width="16" height="16"/>
+  <object id="42" type="floor" gid="2" x="208" y="96" width="16" height="16"/>
+  <object id="43" type="floor" gid="2" x="224" y="96" width="16" height="16"/>
+  <object id="44" type="floor" gid="2" x="240" y="96" width="16" height="16"/>
+  <object id="45" type="floor" gid="3" x="128" y="96" width="16" height="16"/>
+  <object id="46" type="floor" gid="1" x="176" y="96" width="16" height="16"/>
+  <object id="47" type="floor" gid="2" x="144" y="96" width="16" height="16"/>
  </objectgroup>
 </map>

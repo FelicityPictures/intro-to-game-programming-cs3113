@@ -6,12 +6,9 @@
 #define RESOURCE_FOLDER "NYUCodebase.app/Contents/Resources/"
 #endif
 
-#define LETTER_COUNT_X 16
-#define LETTER_COUNT_Y 16
 #define SPRITE_COUNT_X 16
 #define SPRITE_COUNT_Y 8
-#define TILE_SIZE 0.333
-float tile_size = 0.333f;
+#define TILE_SIZE 0.333f
 
 glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 identityMatrix = glm::mat4(1.0f);
@@ -41,9 +38,10 @@ GLuint LoadTexture(const char *filePath) {
 	return retTexture;
 }
 
-Entity::Entity() : x(0.0f), y(0.0f), width(tile_size), height(tile_size) {}
+
+Entity::Entity() : x(0.0f), y(0.0f), width(TILE_SIZE), height(TILE_SIZE) {}
 Entity::Entity(float x, float y, bool isStatic, int spriteIndex) :
-		x(x), y(y), isStatic(isStatic), spriteIndex(spriteIndex), width(tile_size), height(tile_size) {
+		x(x), y(y), isStatic(isStatic), spriteIndex(spriteIndex), width(TILE_SIZE), height(TILE_SIZE) {
 	}
 
 void Entity::Draw(ShaderProgram &p, const GLuint &texture) const {

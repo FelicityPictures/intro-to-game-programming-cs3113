@@ -32,66 +32,78 @@ type=blocks
 location=7,5,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=16,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=17,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=0,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=7,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=1,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=2,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=3,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=4,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=5,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=6,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=8,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=11,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=12,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=13,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=14,6,1,1
 
 [ObjectsLayer]
-type=blocks
+type=floor
 location=15,6,1,1
+
+[ObjectsLayer]
+type=floor
+location=8,6,1,1
+
+[ObjectsLayer]
+type=floor
+location=11,6,1,1
+
+[ObjectsLayer]
+type=floor
+location=9,6,1,1
 
