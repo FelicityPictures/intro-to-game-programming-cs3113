@@ -40,11 +40,11 @@ Entity enemy;
 
 void placeEntity(string type, float placeX, float placeY) {
 	if (type == "blocks") {
-		Entity newBlock = Entity(placeX, placeY, true, 6);
+		Entity newBlock = Entity(placeX, placeY, false, 6);
 		immovableBlocks.push_back(newBlock);
 	}
 	else if (type == "floor") {
-		Entity newBlock = Entity(placeX, placeY, true, 1);
+		Entity newBlock = Entity(placeX, placeY, false, 1);
 		immovableBlocks.push_back(newBlock);
 	}
 	else if (type == "player") {
