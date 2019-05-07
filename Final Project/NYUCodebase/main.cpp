@@ -26,12 +26,14 @@ using namespace std;
 #endif
 
 #define LEVEL_HEIGHT 10
-#define TILE_SIZE 0.2f
+#define TILE_SIZE 0.15f
 #define FIXED_TIMESTEP 0.0166666f
 
 SDL_Window* displayWindow;
 glm::mat4 projectionMatrix = glm::mat4(1.0f);
 glm::mat4 viewMatrix = glm::mat4(1.0f);
+float pixelWidth = 640;
+float pixelHeight = 360;
 
 int main(int argc, char *argv[]){
     SDL_Init(SDL_INIT_VIDEO);
@@ -43,19 +45,26 @@ int main(int argc, char *argv[]){
     glewInit();
 #endif
 
-	glViewport(0, 0, 640, 360);
+	glViewport(0, 0, pixelWidth, pixelHeight);
 	//Textures
 	ShaderProgram program;
+	float widthRatio = pixelWidth / pixelHeight;
+	float heightRatio = 1.0f;
 	//program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
-	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
+	//projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
+	projectionMatrix = glm::ortho(-widthRatio, widthRatio, -heightRatio, heightRatio, -1.0f, 1.0f);
 
 	glUseProgram(program.programID);
 	float lastFrameTicks = 0.0f;
 	float timeAccumulator = 0.0f;
 	Player player = Player();
-	InelasticBox top = InelasticBox(0.0f, 0.95f, 1.777f * 2, TILE_SIZE / 2);
-	InelasticBox bottom = InelasticBox(0.0f, -0.95f, 1.777f * 2, TILE_SIZE / 2);
+	InelasticBox top = InelasticBox(0.0f, heightRatio - 0.05f, widthRatio * 2.0f, 0.1f);
+	InelasticBox bottom = InelasticBox(0.0f, (-heightRatio) + 0.05f, widthRatio * 2.0f, 0.1f);
+	Map map ;
+	/*for (size_t i = 0; i < 12; i++) {
+		test.push_back(InelasticBox((-widthRatio+(TILE_SIZE/2))+(TILE_SIZE*i), (-heightRatio + 0.1 + (TILE_SIZE / 2))+(TILE_SIZE*i), TILE_SIZE, TILE_SIZE));
+	}*/
 
     SDL_Event event;
     bool done = false;
@@ -84,13 +93,16 @@ int main(int argc, char *argv[]){
 		while (timeAccumulator >= FIXED_TIMESTEP) {
 			timeAccumulator -= FIXED_TIMESTEP;
 			player.update(FIXED_TIMESTEP);
+			map.update(FIXED_TIMESTEP);
 		}
 		player.checkInelasticCollision(top);
 		player.checkInelasticCollision(bottom);
+		player.checkMap(map);
 
-		player.draw(program);
 		top.draw(program);
 		bottom.draw(program);
+		map.draw(program);
+		player.draw(program);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

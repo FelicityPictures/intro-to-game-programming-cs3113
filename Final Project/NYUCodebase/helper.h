@@ -18,3 +18,5 @@
 GLuint LoadTexture(const char *filePath);
 
 float lerp(float v0, float v1, float t);
+
+void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height);

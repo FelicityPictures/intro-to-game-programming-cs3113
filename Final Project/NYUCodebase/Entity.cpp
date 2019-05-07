@@ -8,7 +8,7 @@
 
 #define SPRITE_COUNT_X 16
 #define SPRITE_COUNT_Y 8
-#define TILE_SIZE 0.2f
+#define TILE_SIZE 0.15f
 
 glm::mat4 modelMatrix = glm::mat4(1.0f);
 glm::mat4 identityMatrix = glm::mat4(1.0f);
@@ -26,7 +26,7 @@ Entity::Entity() : xPosition(0.0f), yPosition(0.0f), hitboxWidth(TILE_SIZE), hit
 Entity::Entity(float x, float y, int spriteIndex) :	xPosition(x), yPosition(y), spriteIndex(spriteIndex), hitboxWidth(TILE_SIZE), hitboxHeight(TILE_SIZE) {
 }
 void Entity::draw(ShaderProgram &p) const {
-	p.SetColor(0.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f);
+	p.SetColor(255.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f);
 	p.SetModelMatrix(modelMatrix);
 	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 	glEnableVertexAttribArray(p.positionAttribute);
@@ -92,7 +92,53 @@ void InelasticBox::draw(ShaderProgram &p) const {
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
-Player::Player() : Entity(0.0f, 1.0f, 0) {}
+//0 = Nothing;
+//1 = Coin;
+std::vector<int> nothing = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+std::vector<int> infinityCoinShape = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 };
+
+Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(0.0f) {
+	//speed(1.25f){
+	for (size_t i = 0; i < 8; i++) {
+		mapObjects.push_back(nothing);
+	}
+	mapObjects.push_back(infinityCoinShape);
+	mapObjects.push_back(infinityCoinShape);
+	mapObjects.push_back(infinityCoinShape);
+	mapObjects.push_back(infinityCoinShape);
+}
+
+void Map::draw(ShaderProgram &p) const {
+	for (size_t x = 0; x < mapObjects.size(); x++) {
+		for (size_t y = 0; y < mapObjects[x].size(); y++) {
+			if (mapObjects[x][y] == 1) {
+				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
+				p.SetModelMatrix(modelMatrix);
+				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+				glEnableVertexAttribArray(p.positionAttribute);
+
+				glm::mat4 transformMatrix = identityMatrix;
+				float yPosition = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
+				transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
+				transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
+				p.SetModelMatrix(transformMatrix);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDisableVertexAttribArray(p.positionAttribute);
+				glDisableVertexAttribArray(p.texCoordAttribute);
+			}
+		}
+	}
+}
+
+void Map::update(float timeElapsed) {
+	xPositionOfHead -= speed * timeElapsed;
+	if (xPositionOfHead < -1.777f - (TILE_SIZE / 2) && mapObjects.size() > 0) {
+		mapObjects.pop_front();
+		xPositionOfHead += TILE_SIZE;
+	}
+}
+
+Player::Player() : Entity(-0.7f, -0.75f, 0) {}
 
 void Player::update(float timeElapsed) {
 	if (gravityDown) {
@@ -121,4 +167,28 @@ void Player::checkInelasticCollision(const InelasticBox& box) {
 		}
 		yVelocity = 0.0f;
 	}
+}
+
+size_t Player::checkMap(Map& map) {
+	size_t ret = 0;
+	float almostY = (yPosition - (1.0f - 0.1f - (TILE_SIZE / 2.0f))) / (-TILE_SIZE);
+	int upperY = floor(almostY);
+	int lowerY = ceil(almostY);
+	for (size_t x = 8; x < 10 && x < map.mapObjects.size(); x++) {
+		for (size_t y = upperY; y < lowerY + 1 && y < map.mapObjects[x].size(); y++) {
+			//check collision against coin
+			if (map.mapObjects[x][y] == 1) {
+				float objectX = map.xPositionOfHead + (TILE_SIZE * x);
+				float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
+				float XDistBetweenBulletAndAlien = (float)abs(objectX - xPosition) - ((hitboxWidth + TILE_SIZE) / 2);
+				float YDistBetweenBulletAndAlien = (float)abs(objectY - yPosition) - ((hitboxHeight + TILE_SIZE) / 2);
+				if (XDistBetweenBulletAndAlien < 0.0f && YDistBetweenBulletAndAlien < 0.0f) {
+					map.mapObjects[x][y] = 0;
+					return 1;
+				}
+			}
+		}
+	}
+
+	return 0;
 }

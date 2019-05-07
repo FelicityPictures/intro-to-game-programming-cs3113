@@ -6,6 +6,10 @@
 #define RESOURCE_FOLDER "NYUCodebase.app/Contents/Resources/"
 #endif
 
+
+#define LETTER_COUNT_X 16
+#define LETTER_COUNT_Y 16
+
 GLuint LoadTexture(const char *filePath) {
 	int w, h, comp;
 	unsigned char* image = stbi_load(filePath, &w, &h, &comp, STBI_rgb_alpha);
@@ -25,4 +29,45 @@ GLuint LoadTexture(const char *filePath) {
 
 float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t * v1;
+}
+
+void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height) {
+	float defaultVertices[12] = {
+		0.5f, 0.5f,
+		-0.5f, 0.5f,
+		-0.5f, -0.5f,
+		0.5f, 0.5f,
+		-0.5f, -0.5f,
+		0.5f, -0.5f
+	};
+	p.SetModelMatrix(glm::mat4(1.0f));
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+
+	glm::mat4 transformMatrix;
+	float u, v;
+	float spriteWidth = 1.0f / (float)LETTER_COUNT_X;
+	float spriteHeight = 1.0f / (float)LETTER_COUNT_Y;
+	glBindTexture(GL_TEXTURE_2D, texture);
+	for (int i = 0; i < strLength; i++) {
+		u = (float)(str[i] % LETTER_COUNT_X) / (float)LETTER_COUNT_X;
+		v = (float)(str[i] / LETTER_COUNT_X) / (float)LETTER_COUNT_Y;
+		float texCoords[] = {
+		u + spriteWidth, v,
+		u, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v + spriteHeight
+		};
+		glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+		glEnableVertexAttribArray(p.texCoordAttribute);
+		transformMatrix = glm::mat4(1.0f);
+		transformMatrix = glm::translate(transformMatrix, glm::vec3(x + (height * i), y, 0.0f));
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(height, height, 0.0f));
+		p.SetModelMatrix(transformMatrix);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
 }

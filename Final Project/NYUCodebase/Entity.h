@@ -10,6 +10,8 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
+#include <deque>
+#include <math.h>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
@@ -40,6 +42,18 @@ public:
 	void draw(ShaderProgram &p) const;
 };
 
+class Map {
+public:
+	std::deque<std::vector<int>> mapObjects;
+	float xPositionOfHead;
+	float speed;
+
+	Map();
+	void draw(ShaderProgram &p) const;
+
+	void update(float timeElapsed);
+};
+
 class Player : public Entity {
 public:
 	bool gravityDown = true;
@@ -49,4 +63,5 @@ public:
 	void update(float timeElapsed);
 	void changeDirection();
 	void checkInelasticCollision(const InelasticBox& box);
+	size_t checkMap(Map& map);
 };
