@@ -6,8 +6,8 @@
 #define RESOURCE_FOLDER "NYUCodebase.app/Contents/Resources/"
 #endif
 
-#define SPRITE_COUNT_X 16
-#define SPRITE_COUNT_Y 8
+#define SPRITE_COUNT_X 4
+#define SPRITE_COUNT_Y 3
 #define TILE_SIZE 0.15f
 
 glm::mat4 modelMatrix = glm::mat4(1.0f);
@@ -46,7 +46,7 @@ void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
 	glEnableVertexAttribArray(p.positionAttribute);
 	glBindTexture(GL_TEXTURE_2D, texture);
 
-	/*float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+	float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 	float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
 	float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
 	float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
@@ -59,11 +59,11 @@ void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
 	u + spriteWidth, v + spriteHeight
 	};
 	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-	glEnableVertexAttribArray(p.texCoordAttribute);*/
+	glEnableVertexAttribArray(p.texCoordAttribute);
 
 	glm::mat4 transformMatrix = identityMatrix;
 	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(hitboxWidth, hitboxHeight, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 	p.SetModelMatrix(transformMatrix);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(p.positionAttribute);
@@ -73,10 +73,11 @@ void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
 void Entity::update(float timeElapsed) {
 }
 
-InelasticBox::InelasticBox(float x, float y, float width, float height)	: Entity(x, y, 0){
+InelasticBox::InelasticBox(float x, float y, float width, float height)	: Entity(x, y, 6){
 	hitboxWidth = width;
 	hitboxHeight = height;
 }
+
 void InelasticBox::draw(ShaderProgram &p) const {
 	p.SetColor(0.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f, 1.0f);
 	p.SetModelMatrix(modelMatrix);
@@ -92,30 +93,73 @@ void InelasticBox::draw(ShaderProgram &p) const {
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
+void InelasticBox::draw(ShaderProgram &p, const GLuint &texture) const {
+	p.SetColor(0.0f / 255.0f, 0.0f / 255.0f, 255.0f / 255.0f, 1.0f);
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+
+	float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+	float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+	float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+	float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+	float texCoords[] = {
+	u + spriteWidth, v,
+	u, v,
+	u, v + spriteHeight,
+	u + spriteWidth, v,
+	u, v + spriteHeight,
+	u + spriteWidth, v + spriteHeight
+	};
+	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+	glEnableVertexAttribArray(p.texCoordAttribute);
+
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(hitboxWidth, hitboxHeight, 0.0f));
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
 //0 = Nothing;
 //1 = Coin;
 std::vector<int> nothing = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-std::vector<int> infinityCoinShape = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 };
+std::vector<int> infinityCoinShape0 = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 };
+std::vector<int> infinityCoinShape1 = { 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0 };
+std::vector<int> infinityCoinShape2 = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0 };
+std::vector<int> infinityCoinShape3 = { 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0 };
+std::vector<int> infinityCoinShape4 = { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 };
 
-Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(0.0f) {
-	//speed(1.25f){
-	for (size_t i = 0; i < 8; i++) {
-		mapObjects.push_back(nothing);
-	}
-	mapObjects.push_back(infinityCoinShape);
-	mapObjects.push_back(infinityCoinShape);
-	mapObjects.push_back(infinityCoinShape);
-	mapObjects.push_back(infinityCoinShape);
+Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(1.25f) {
+	insertNewPartIntoMap();
 }
 
-void Map::draw(ShaderProgram &p) const {
+void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 	for (size_t x = 0; x < mapObjects.size(); x++) {
 		for (size_t y = 0; y < mapObjects[x].size(); y++) {
 			if (mapObjects[x][y] == 1) {
+				int spriteIndex = 8;
 				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
 				p.SetModelMatrix(modelMatrix);
 				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 				glEnableVertexAttribArray(p.positionAttribute);
+
+				float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+				float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+				float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+				float texCoords[] = {
+				u + spriteWidth, v,
+				u, v,
+				u, v + spriteHeight,
+				u + spriteWidth, v,
+				u, v + spriteHeight,
+				u + spriteWidth, v + spriteHeight
+				};
+				glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+				glEnableVertexAttribArray(p.texCoordAttribute);
 
 				glm::mat4 transformMatrix = identityMatrix;
 				float yPosition = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
@@ -136,9 +180,67 @@ void Map::update(float timeElapsed) {
 		mapObjects.pop_front();
 		xPositionOfHead += TILE_SIZE;
 	}
+	if (mapObjects.size() < 30) {
+		insertNewPartIntoMap();
+	}
 }
 
-Player::Player() : Entity(-0.7f, -0.75f, 0) {}
+void Map::insertNewPartIntoMap() {
+	for (size_t i = 0; i < 10; i++) {
+		mapObjects.push_back(nothing);
+	}
+	mapObjects.push_back(infinityCoinShape0);
+	mapObjects.push_back(infinityCoinShape1);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape1);
+	mapObjects.push_back(infinityCoinShape3);
+	mapObjects.push_back(infinityCoinShape4);
+	mapObjects.push_back(infinityCoinShape4);
+	mapObjects.push_back(infinityCoinShape3);
+	mapObjects.push_back(infinityCoinShape1);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape2);
+	mapObjects.push_back(infinityCoinShape1);
+	mapObjects.push_back(infinityCoinShape0);
+}
+
+Player::Player() : Entity(-0.7f, -0.6f, 1) {}
+
+void Player::draw(ShaderProgram &p, const GLuint &texture) const {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+	float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+	float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+	float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+	float texCoords[] = {
+	u + spriteWidth, v,
+	u, v,
+	u, v + spriteHeight,
+	u + spriteWidth, v,
+	u, v + spriteHeight,
+	u + spriteWidth, v + spriteHeight
+	};
+	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+	glEnableVertexAttribArray(p.texCoordAttribute);
+
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
+	if (!gravityDown) {
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(1.0, -1.0f, 0.0f));
+	}
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
 
 void Player::update(float timeElapsed) {
 	if (gravityDown) {
@@ -174,8 +276,11 @@ size_t Player::checkMap(Map& map) {
 	float almostY = (yPosition - (1.0f - 0.1f - (TILE_SIZE / 2.0f))) / (-TILE_SIZE);
 	int upperY = floor(almostY);
 	int lowerY = ceil(almostY);
-	for (size_t x = 8; x < 10 && x < map.mapObjects.size(); x++) {
-		for (size_t y = upperY; y < lowerY + 1 && y < map.mapObjects[x].size(); y++) {
+	if (upperY == 0) {
+		upperY = 1;
+	}
+	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
+		for (size_t y = upperY - 1; y < lowerY + 2 && y < map.mapObjects[x].size(); y++) {
 			//check collision against coin
 			if (map.mapObjects[x][y] == 1) {
 				float objectX = map.xPositionOfHead + (TILE_SIZE * x);
@@ -184,11 +289,10 @@ size_t Player::checkMap(Map& map) {
 				float YDistBetweenBulletAndAlien = (float)abs(objectY - yPosition) - ((hitboxHeight + TILE_SIZE) / 2);
 				if (XDistBetweenBulletAndAlien < 0.0f && YDistBetweenBulletAndAlien < 0.0f) {
 					map.mapObjects[x][y] = 0;
-					return 1;
+					ret++;
 				}
 			}
 		}
 	}
-
-	return 0;
+	return ret;
 }

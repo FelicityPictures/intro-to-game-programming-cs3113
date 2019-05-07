@@ -50,21 +50,23 @@ int main(int argc, char *argv[]){
 	ShaderProgram program;
 	float widthRatio = pixelWidth / pixelHeight;
 	float heightRatio = 1.0f;
-	//program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
-	program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
-	//projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
+	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	//program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 	projectionMatrix = glm::ortho(-widthRatio, widthRatio, -heightRatio, heightRatio, -1.0f, 1.0f);
 
+	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
+	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"letters.png");
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(program.programID);
+
 	float lastFrameTicks = 0.0f;
 	float timeAccumulator = 0.0f;
 	Player player = Player();
 	InelasticBox top = InelasticBox(0.0f, heightRatio - 0.05f, widthRatio * 2.0f, 0.1f);
 	InelasticBox bottom = InelasticBox(0.0f, (-heightRatio) + 0.05f, widthRatio * 2.0f, 0.1f);
-	Map map ;
-	/*for (size_t i = 0; i < 12; i++) {
-		test.push_back(InelasticBox((-widthRatio+(TILE_SIZE/2))+(TILE_SIZE*i), (-heightRatio + 0.1 + (TILE_SIZE / 2))+(TILE_SIZE*i), TILE_SIZE, TILE_SIZE));
-	}*/
+	bottom.spriteIndex = 7;
+	Map map;
 
     SDL_Event event;
     bool done = false;
@@ -81,6 +83,14 @@ int main(int argc, char *argv[]){
 			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
 					player.changeDirection();
+					if (player.gravityDown) {
+						bottom.spriteIndex = 7;
+						top.spriteIndex = 6;
+					}
+					else {
+						bottom.spriteIndex = 6;
+						top.spriteIndex = 7;
+					}
 				}
 			}
         }
@@ -94,15 +104,15 @@ int main(int argc, char *argv[]){
 			timeAccumulator -= FIXED_TIMESTEP;
 			player.update(FIXED_TIMESTEP);
 			map.update(FIXED_TIMESTEP);
+			player.checkInelasticCollision(top);
+			player.checkInelasticCollision(bottom);
+			player.checkMap(map);
 		}
-		player.checkInelasticCollision(top);
-		player.checkInelasticCollision(bottom);
-		player.checkMap(map);
 
-		top.draw(program);
-		bottom.draw(program);
-		map.draw(program);
-		player.draw(program);
+		top.draw(program, spriteSheet);
+		bottom.draw(program, spriteSheet);
+		map.draw(program, spriteSheet);
+		player.draw(program, spriteSheet);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

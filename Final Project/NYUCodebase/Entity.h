@@ -40,6 +40,7 @@ public:
 	InelasticBox(float x, float y, float width, float height);
 
 	void draw(ShaderProgram &p) const;
+	void draw(ShaderProgram &p, const GLuint &texture) const;
 };
 
 class Map {
@@ -49,9 +50,12 @@ public:
 	float speed;
 
 	Map();
-	void draw(ShaderProgram &p) const;
+	void draw(ShaderProgram &p, const GLuint &texture) const;
 
 	void update(float timeElapsed);
+
+private:
+	void insertNewPartIntoMap();
 };
 
 class Player : public Entity {
@@ -59,6 +63,7 @@ public:
 	bool gravityDown = true;
 
 	Player();
+	void draw(ShaderProgram &p, const GLuint &texture) const;
 
 	void update(float timeElapsed);
 	void changeDirection();
