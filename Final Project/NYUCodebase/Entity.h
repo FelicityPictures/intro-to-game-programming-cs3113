@@ -22,15 +22,22 @@ public:
 	float hitboxWidth;
 	float hitboxHeight;
 	int spriteIndex;
-	float velocityX;
-	float velocityY;
+	float xVelocity = 0.0f;
+	float yVelocity = 0.0f;
 
 	Entity();
 	Entity(float x, float y, int spriteIndex);
 
 	void draw(ShaderProgram &p) const;
 	void draw(ShaderProgram &p, const GLuint &texture) const;
-	virtual void update();
+	virtual void update(float timeElapsed);
+};
+
+class InelasticBox : public Entity {
+public:
+	InelasticBox(float x, float y, float width, float height);
+
+	void draw(ShaderProgram &p) const;
 };
 
 class Player : public Entity {
@@ -39,5 +46,7 @@ public:
 
 	Player();
 
-	void update();
+	void update(float timeElapsed);
+	void changeDirection();
+	void checkInelasticCollision(const InelasticBox& box);
 };

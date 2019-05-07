@@ -46,20 +46,16 @@ int main(int argc, char *argv[]){
 	glViewport(0, 0, 640, 360);
 	//Textures
 	ShaderProgram program;
-	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	//program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	glUseProgram(program.programID);
-	/*float elapsed = 0.0f;
-	float accumulator = 0.0f;
-	float velocity_x = 0.0f;
-	float velocity_y = 0.0f;
-	float acceleration_x = 0.01f;
-	float gravity = 0.098f;
-	float friction_x = 0.1f;
-	float friction_y = 0.0f;
-	float timestepsElapsed = 1.0f;*/
+	float lastFrameTicks = 0.0f;
+	float timeAccumulator = 0.0f;
 	Player player = Player();
+	InelasticBox top = InelasticBox(0.0f, 0.95f, 1.777f * 2, TILE_SIZE / 2);
+	InelasticBox bottom = InelasticBox(0.0f, -0.95f, 1.777f * 2, TILE_SIZE / 2);
 
     SDL_Event event;
     bool done = false;
@@ -67,25 +63,34 @@ int main(int argc, char *argv[]){
 	program.SetProjectionMatrix(projectionMatrix);
 	program.SetViewMatrix(viewMatrix);
 
-	//GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites.png");
-	//glEnable(GL_BLEND);
-	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	const Uint8 *keys = SDL_GetKeyboardState(NULL);
 	while (!done) {
         while (SDL_PollEvent(&event)) {
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 				done = true;
 			}
-			/*else if (event.type == SDL_KEYDOWN) {
+			else if (event.type == SDL_KEYDOWN) {
 				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
-					velocity_y = 0.4f;
+					player.changeDirection();
 				}
-			}*/
+			}
         }
 		glClear(GL_COLOR_BUFFER_BIT);
 
+		//TIMING
+		float ticks = (float)SDL_GetTicks() / 1000.0f;
+		timeAccumulator += ticks - lastFrameTicks;
+		lastFrameTicks = ticks;
+		while (timeAccumulator >= FIXED_TIMESTEP) {
+			timeAccumulator -= FIXED_TIMESTEP;
+			player.update(FIXED_TIMESTEP);
+		}
+		player.checkInelasticCollision(top);
+		player.checkInelasticCollision(bottom);
+
 		player.draw(program);
-		player.update();
+		top.draw(program);
+		bottom.draw(program);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
