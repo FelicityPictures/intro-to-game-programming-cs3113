@@ -92,6 +92,11 @@ void InelasticBox::draw(ShaderProgram &p, const GLuint &texture) const {
 //0 = Nothing;
 //1 = Coin;
 std::vector<int> nothing = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+void insertEmptySpace(std::deque<std::vector<int>>& map) {
+	map.push_back(nothing);
+}
+
 std::vector<int> infinityCoinShape0 = { 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0 };
 std::vector<int> infinityCoinShape1 = { 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0 };
 std::vector<int> infinityCoinShape2 = { 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0 };
@@ -139,7 +144,9 @@ void insertMiddleCoins(std::deque<std::vector<int>>& map) {
 }
 
 Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(1.25f) {
-	insertNewPartIntoMap();
+	for (size_t i = 0; i < 30; i++) {
+		insertEmptySpace(mapObjects);
+	}
 }
 
 void Map::draw(ShaderProgram &p, const GLuint &texture) const {
@@ -195,7 +202,7 @@ void Map::update(float timeElapsed) {
 void Map::insertNewPartIntoMap() {
 	int insertBlank = rand() % 4 + 6;
 	for (size_t i = 0; i < rand() % 4 + 6; i++) {
-		mapObjects.push_back(nothing);
+		insertEmptySpace(mapObjects);
 	}
 	int nextInsertShape = rand() % 4;
 	switch (nextInsertShape) {
@@ -219,19 +226,25 @@ void Map::insertNewPartIntoMap() {
 }
 
 Enemy::Enemy(float y) : Entity(1.777f, y, 7){ }
-void Enemy::update(float timeElapsed, float targetY) {
+
+// returns true is it's past the screen
+bool Enemy::update(float timeElapsed, float targetY) {
 	timeAlive += timeElapsed;
 	if (timeAlive <= 2.0f) {
 		if (targetY > yPosition) {
-			yPosition += 0.5f * timeElapsed;
+			yPosition += 1.2f * timeElapsed;
 		}
 		else {
-			yPosition -= 0.5f * timeElapsed;
+			yPosition -= 1.2f * timeElapsed;
 		}
 	}
 	else{
-		xPosition -= 2.0f * timeElapsed;
+		xPosition -= 3.0f * timeElapsed;
+		if (xPosition < -2.0f) {
+			return true;
+		}
 	}
+	return false;
 }
 
 Player::Player() : Entity(-0.7f, -0.6f, 1) {

@@ -27,6 +27,7 @@ public:
 	int spriteIndex;
 	float xVelocity = 0.0f;
 	float yVelocity = 0.0f;
+	float animationTracker = 0.0f;
 
 	Entity();
 	Entity(float x, float y, int spriteIndex);
@@ -42,6 +43,7 @@ public:
 	void draw(ShaderProgram &p, const GLuint &texture) const;
 };
 
+void insertEmptySpace(std::deque<std::vector<int>>& map);
 void insertInfinityShapeCoins(std::deque<std::vector<int>>& map);
 void insertTopCoins(std::deque<std::vector<int>>& map);
 void insertBottomCoins(std::deque<std::vector<int>>& map);
@@ -52,6 +54,7 @@ public:
 	std::deque<std::vector<int>> mapObjects;
 	float xPositionOfHead;
 	float speed;
+	float animationTracker = 0.0f;
 
 	Map();
 	void draw(ShaderProgram &p, const GLuint &texture) const;
@@ -66,7 +69,7 @@ class Enemy : public Entity {
 public:
 	float timeAlive = 0.0f;
 	Enemy(float y);
-	void update(float timeElapsed, float targetY);
+	bool update(float timeElapsed, float targetY);
 };
 
 class Player : public Entity {

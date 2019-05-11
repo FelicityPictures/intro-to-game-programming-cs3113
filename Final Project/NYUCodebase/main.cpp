@@ -59,7 +59,7 @@ int main(int argc, char *argv[]){
 	Mix_PlayMusic(bgm, -1);
 
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
-	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"letters.png");
+	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(program.programID);
@@ -118,7 +118,10 @@ int main(int argc, char *argv[]){
 			player.checkInelasticCollision(bottom);
 			score += player.checkMap(map);
 			for (size_t i = 0; i < enemies.size(); i++) {
-				enemies[i].update(FIXED_TIMESTEP, player.yPosition);
+				if (enemies[i].update(FIXED_TIMESTEP, player.yPosition)) {
+					swap(enemies[i], enemies[enemies.size()-1]);
+					enemies.pop_back();
+				}
 			}
 		}
 
@@ -127,7 +130,6 @@ int main(int argc, char *argv[]){
 		bottom.draw(program, spriteSheet);
 		map.draw(program, spriteSheet);
 		player.draw(program, spriteSheet);
-
 		for (size_t i = 0; i < enemies.size(); i++) {
 			enemies[i].draw(program, spriteSheet);
 		}
@@ -136,7 +138,7 @@ int main(int argc, char *argv[]){
 			scoreText[9 - i] = '0' + (temporaryScore % 10);
 			temporaryScore = floor(temporaryScore / 10);
 		}
-		drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
+		drawText(program, textSheet, scoreText, 10, -1.7f, 0.95f, 0.05f);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
