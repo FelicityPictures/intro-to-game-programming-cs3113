@@ -5,6 +5,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL_opengl.h>
 #include <SDL_image.h>
+#include <SDL_mixer.h>
 #include "ShaderProgram.h"
 #include "helper.h"
 #include "Entity.h"
@@ -51,8 +52,11 @@ int main(int argc, char *argv[]){
 	float widthRatio = pixelWidth / pixelHeight;
 	float heightRatio = 1.0f;
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
-	//program.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 	projectionMatrix = glm::ortho(-widthRatio, widthRatio, -heightRatio, heightRatio, -1.0f, 1.0f);
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	Mix_Music *bgm;
+	bgm = Mix_LoadMUS("bgm.mp3");
+	Mix_PlayMusic(bgm, -1);
 
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"letters.png");
@@ -120,7 +124,7 @@ int main(int argc, char *argv[]){
 			scoreText[9 - i] = '0' + (temporaryScore % 10);
 			temporaryScore = floor(temporaryScore / 10);
 		}
-		drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
+		//drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
