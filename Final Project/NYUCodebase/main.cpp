@@ -67,6 +67,8 @@ int main(int argc, char *argv[]){
 	InelasticBox bottom = InelasticBox(0.0f, (-heightRatio) + 0.05f, widthRatio * 2.0f, 0.1f);
 	bottom.spriteIndex = 7;
 	Map map;
+	size_t score = 0;
+	char scoreText[] = "Score 0000";
 
     SDL_Event event;
     bool done = false;
@@ -106,13 +108,19 @@ int main(int argc, char *argv[]){
 			map.update(FIXED_TIMESTEP);
 			player.checkInelasticCollision(top);
 			player.checkInelasticCollision(bottom);
-			player.checkMap(map);
+			score += player.checkMap(map);
 		}
 
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
 		map.draw(program, spriteSheet);
 		player.draw(program, spriteSheet);
+		int temporaryScore = score;
+		for (int i = 0; i < 4; i++) {
+			scoreText[9 - i] = '0' + (temporaryScore % 10);
+			temporaryScore = floor(temporaryScore / 10);
+		}
+		drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

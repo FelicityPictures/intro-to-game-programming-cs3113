@@ -12,6 +12,7 @@
 #include <vector>
 #include <deque>
 #include <math.h>
+#include "helper.h"
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
@@ -30,7 +31,6 @@ public:
 	Entity();
 	Entity(float x, float y, int spriteIndex);
 
-	void draw(ShaderProgram &p) const;
 	void draw(ShaderProgram &p, const GLuint &texture) const;
 	virtual void update(float timeElapsed);
 };
@@ -39,9 +39,13 @@ class InelasticBox : public Entity {
 public:
 	InelasticBox(float x, float y, float width, float height);
 
-	void draw(ShaderProgram &p) const;
 	void draw(ShaderProgram &p, const GLuint &texture) const;
 };
+
+void insertInfinityShapeCoins(std::deque<std::vector<int>>& map);
+void insertTopCoins(std::deque<std::vector<int>>& map);
+void insertBottomCoins(std::deque<std::vector<int>>& map);
+void insertMiddleCoins(std::deque<std::vector<int>>& map);
 
 class Map {
 public:
