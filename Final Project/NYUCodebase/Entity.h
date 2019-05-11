@@ -65,8 +65,8 @@ private:
 class Enemy : public Entity {
 public:
 	float timeAlive = 0.0f;
-	Enemy(float x, float y);
-	void update(float timeElapsed, float targetX, float targetY);
+	Enemy(float y);
+	void update(float timeElapsed, float targetY);
 };
 
 class Player : public Entity {

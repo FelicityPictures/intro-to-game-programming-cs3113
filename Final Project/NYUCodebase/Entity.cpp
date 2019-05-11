@@ -218,6 +218,22 @@ void Map::insertNewPartIntoMap() {
 	}
 }
 
+Enemy::Enemy(float y) : Entity(1.777f, y, 7){ }
+void Enemy::update(float timeElapsed, float targetY) {
+	timeAlive += timeElapsed;
+	if (timeAlive <= 2.0f) {
+		if (targetY > yPosition) {
+			yPosition += 0.5f * timeElapsed;
+		}
+		else {
+			yPosition -= 0.5f * timeElapsed;
+		}
+	}
+	else{
+		xPosition -= 2.0f * timeElapsed;
+	}
+}
+
 Player::Player() : Entity(-0.7f, -0.6f, 1) {
 	hitboxWidth = TILE_SIZE * 0.75f;
 	hitboxHeight = TILE_SIZE * 0.75f;

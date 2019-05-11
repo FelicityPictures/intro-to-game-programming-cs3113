@@ -71,6 +71,7 @@ int main(int argc, char *argv[]){
 	InelasticBox bottom = InelasticBox(0.0f, (-heightRatio) + 0.05f, widthRatio * 2.0f, 0.1f);
 	bottom.spriteIndex = 7;
 	Map map;
+	vector<Enemy> enemies;
 	size_t score = 0;
 	char scoreText[] = "Score 0000";
 
@@ -98,11 +99,14 @@ int main(int argc, char *argv[]){
 						top.spriteIndex = 7;
 					}
 				}
+				else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
+					enemies.push_back(Enemy(player.yPosition));
+				}
 			}
         }
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//TIMING
+		// TIMING and UPDATE
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		timeAccumulator += ticks - lastFrameTicks;
 		lastFrameTicks = ticks;
@@ -113,12 +117,20 @@ int main(int argc, char *argv[]){
 			player.checkInelasticCollision(top);
 			player.checkInelasticCollision(bottom);
 			score += player.checkMap(map);
+			for (size_t i = 0; i < enemies.size(); i++) {
+				enemies[i].update(FIXED_TIMESTEP, player.yPosition);
+			}
 		}
 
+		// DRAWING
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
 		map.draw(program, spriteSheet);
 		player.draw(program, spriteSheet);
+
+		for (size_t i = 0; i < enemies.size(); i++) {
+			enemies[i].draw(program, spriteSheet);
+		}
 		int temporaryScore = score;
 		for (int i = 0; i < 4; i++) {
 			scoreText[9 - i] = '0' + (temporaryScore % 10);
