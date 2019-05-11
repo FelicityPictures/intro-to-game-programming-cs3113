@@ -63,6 +63,7 @@ void InelasticBox::draw(ShaderProgram &p, const GLuint &texture) const {
 	p.SetModelMatrix(modelMatrix);
 	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 	glEnableVertexAttribArray(p.positionAttribute);
+	glBindTexture(GL_TEXTURE_2D, texture);
 
 	float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 	float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
@@ -150,6 +151,7 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				p.SetModelMatrix(modelMatrix);
 				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 				glEnableVertexAttribArray(p.positionAttribute);
+				glBindTexture(GL_TEXTURE_2D, texture);
 
 				float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 				float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
@@ -216,7 +218,10 @@ void Map::insertNewPartIntoMap() {
 	}
 }
 
-Player::Player() : Entity(-0.7f, -0.6f, 1) {}
+Player::Player() : Entity(-0.7f, -0.6f, 1) {
+	hitboxWidth = TILE_SIZE * 0.75f;
+	hitboxHeight = TILE_SIZE * 0.75f;
+}
 
 void Player::draw(ShaderProgram &p, const GLuint &texture) const {
 	p.SetModelMatrix(modelMatrix);
@@ -298,9 +303,19 @@ size_t Player::checkMap(Map& map) {
 			if (map.mapObjects[x][y] == 1) {
 				float objectX = map.xPositionOfHead + (TILE_SIZE * x);
 				float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
-				float XDistBetweenBulletAndAlien = (float)abs(objectX - xPosition) - ((hitboxWidth + TILE_SIZE) / 2);
+				// box box collision
+				/*float XDistBetweenBulletAndAlien = (float)abs(objectX - xPosition) - ((hitboxWidth + TILE_SIZE) / 2);
 				float YDistBetweenBulletAndAlien = (float)abs(objectY - yPosition) - ((hitboxHeight + TILE_SIZE) / 2);
 				if (XDistBetweenBulletAndAlien < 0.0f && YDistBetweenBulletAndAlien < 0.0f) {
+					map.mapObjects[x][y] = 0;
+					ret++;
+				}*/
+
+				//circle circle collision
+				float aSquared = pow(objectX - xPosition, 2.0f);
+				float bSquared = pow(objectY - yPosition, 2.0f);
+				float c = sqrt(aSquared + bSquared);
+				if (c < hitboxHeight + (TILE_SIZE / 2.0f)) {
 					map.mapObjects[x][y] = 0;
 					ret++;
 				}

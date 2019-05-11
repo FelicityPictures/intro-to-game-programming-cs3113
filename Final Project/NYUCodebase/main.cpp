@@ -124,7 +124,7 @@ int main(int argc, char *argv[]){
 			scoreText[9 - i] = '0' + (temporaryScore % 10);
 			temporaryScore = floor(temporaryScore / 10);
 		}
-		//drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
+		drawText(program, textSheet, scoreText, 10, -1.7f, 0.9f, 0.1f);
 
 		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);

@@ -62,6 +62,13 @@ private:
 	void insertNewPartIntoMap();
 };
 
+class Enemy : public Entity {
+public:
+	float timeAlive = 0.0f;
+	Enemy(float x, float y);
+	void update(float timeElapsed, float targetX, float targetY);
+};
+
 class Player : public Entity {
 public:
 	bool gravityDown = true;
