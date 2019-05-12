@@ -62,7 +62,7 @@ int main(int argc, char *argv[]){
 
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
-	GLuint backgroundTexture1 = LoadTexture(RESOURCE_FOLDER"background1.png");
+	//GLuint backgroundTexture1 = LoadTexture(RESOURCE_FOLDER"background1.png");
 	GLuint backgroundTexture2 = LoadTexture(RESOURCE_FOLDER"background2.png");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -80,7 +80,7 @@ int main(int argc, char *argv[]){
 	char scoreText[] = "Score 0000";
 	float timeSurvived = 0.0f;
 	float rocketTimer = 0.0f;
-	Background backgrounds = Background(backgroundTexture1, backgroundTexture2);
+	Background backgrounds = Background(backgroundTexture2);
 
     SDL_Event event;
     bool done = false;

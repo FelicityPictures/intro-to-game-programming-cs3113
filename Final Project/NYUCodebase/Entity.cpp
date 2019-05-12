@@ -197,6 +197,39 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				glDisableVertexAttribArray(p.positionAttribute);
 				glDisableVertexAttribArray(p.texCoordAttribute);
 			}
+			else if (mapObjects[x][y] == 4) {
+				int spriteIndex = 15;
+				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
+				p.SetModelMatrix(modelMatrix);
+				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+				glEnableVertexAttribArray(p.positionAttribute);
+				glBindTexture(GL_TEXTURE_2D, texture);
+
+				float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+				float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+				float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+				float texCoords[] = {
+				u + spriteWidth, v,
+				u, v,
+				u, v + spriteHeight,
+				u + spriteWidth, v,
+				u, v + spriteHeight,
+				u + spriteWidth, v + spriteHeight
+				};
+				glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+				glEnableVertexAttribArray(p.texCoordAttribute);
+
+				glm::mat4 transformMatrix = identityMatrix;
+				float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
+				transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
+				transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
+				transformMatrix = glm::rotate(transformMatrix, animationTracker, glm::vec3(0.0f, 0.0f, 1.0f));
+				p.SetModelMatrix(transformMatrix);
+				glDrawArrays(GL_TRIANGLES, 0, 6);
+				glDisableVertexAttribArray(p.positionAttribute);
+				glDisableVertexAttribArray(p.texCoordAttribute);
+			}
 		}
 	}
 }
@@ -215,10 +248,10 @@ void Map::update(float timeElapsed, float timeSurvived) {
 
 void Map::insertNewPartIntoMap() {
 	int insertBlank = rand() % 4 + 6;
-	for (int i = 0; i < rand() % 4 + 6; i++) {
+	for (int i = 0; i < rand() % 6 + 1; i++) {
 		insertEmptySpace(mapObjects);
 	}
-	int nextInsertShape = rand() % 4;
+	int nextInsertShape = rand() % 7;
 	switch (nextInsertShape) {
 	case 0: {
 		insertInfinityShapeCoins(mapObjects);
@@ -234,6 +267,18 @@ void Map::insertNewPartIntoMap() {
 	}
 	case 3: {
 		insertBottomCoins(mapObjects);
+		break;
+	}
+	case 4: {
+		mapObjects.push_back({4,4,4,0,0,0,0,0,0,0,0,0});
+		break;
+	}
+	case 5: {
+		mapObjects.push_back({ 0,0,0,0,0,0,0,0,0,4,4,4 });
+		break;
+	}
+	case 6: {
+		mapObjects.push_back({ 0,0,0,0,4,4,4,4,0,0,0,0 });
 		break;
 	}
 	}
@@ -260,6 +305,7 @@ bool Enemy::update(float timeElapsed, float targetY, float timeSurvived) {
 			launched = true;
 			Mix_Chunk *rocketSound;
 			rocketSound = Mix_LoadWAV("Missle_Launch.wav");
+			Mix_VolumeChunk(rocketSound, 90);
 			Mix_PlayChannel(-1, rocketSound, 0);
 		}
 		xPosition -= (3.0f + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
@@ -423,9 +469,9 @@ size_t Player::checkMap(Map& map) {
 	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
 		for (size_t y = upperY - 1; y < lowerY + 2 && y < map.mapObjects[x].size(); y++) {
 			//check collision against coin
+			float objectX = map.xPositionOfHead + (TILE_SIZE * x);
+			float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
 			if (map.mapObjects[x][y] == 1) {
-				float objectX = map.xPositionOfHead + (TILE_SIZE * x);
-				float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
 				//circle circle collision
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
@@ -433,6 +479,15 @@ size_t Player::checkMap(Map& map) {
 				if (c < hitboxHeight + (TILE_SIZE / 2.0f)) {
 					map.mapObjects[x][y] = 0;
 					ret++;
+				}
+			}
+			else if (map.mapObjects[x][y] == 4) {
+				float XDistBetweenObstacleAndPlayer = (float)abs(objectX - xPosition) - ((TILE_SIZE + hitboxWidth) / 2);
+				float YDistBetweenObstacleAndPlayer = (float)abs(objectY - yPosition) - ((TILE_SIZE + hitboxHeight) / 2);
+				if (XDistBetweenObstacleAndPlayer < 0.0f && YDistBetweenObstacleAndPlayer < 0.0f) {
+					yVelocity = 0.0f;
+					spriteIndex = 5;
+					timeDead += 0.0001f;
 				}
 			}
 		}
