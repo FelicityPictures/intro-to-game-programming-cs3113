@@ -73,3 +73,59 @@ void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float
 	glDisableVertexAttribArray(p.positionAttribute);
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
+
+
+Background::Background(const GLuint& texture) {
+	backgrounds.push_back(texture);
+	backgrounds.push_back(texture);
+}
+
+Background::Background(const GLuint& texture1, const GLuint& texture2) {
+	backgrounds.push_back(texture1);
+	backgrounds.push_back(texture2);
+}
+
+void Background::addNewTexture(const GLuint& texture) {
+	backgrounds.push_back(texture);
+}
+
+void Background::draw(ShaderProgram &p) const {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+	glBindTexture(GL_TEXTURE_2D, backgrounds[0]);
+	float texCoords[] = {
+	1.0f, 0.0f,
+	0.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 0.0f,
+	0.0f, 1.0f,
+	1.0f, 1.0f
+	};
+	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+	glEnableVertexAttribArray(p.texCoordAttribute);
+
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(currentX, 0.0f, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(4.0f, 2.0f, 0.0f));
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+
+	glBindTexture(GL_TEXTURE_2D, backgrounds[1]);
+	transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(currentX + 4.0f, 0.0f, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(4.0f, 2.0f, 0.0f));
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
+void Background::update(float timeElapsed) {
+	currentX -= 1.25 * timeElapsed;
+	if (currentX < -3.777f) {
+		currentX = currentX + 4.0f;
+		backgrounds.push_back(backgrounds[0]);
+		backgrounds.erase(backgrounds.begin());
+	}
+}

@@ -8,7 +8,7 @@
 #endif
 
 #define SPRITE_COUNT_X 4
-#define SPRITE_COUNT_Y 3
+#define SPRITE_COUNT_Y 4
 #define TILE_SIZE 0.15f
 
 extern glm::mat4 modelMatrix;
@@ -31,12 +31,12 @@ void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
 	float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
 	float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
 	float texCoords[] = {
-	u + spriteWidth, v,
-	u, v,
-	u, v + spriteHeight,
-	u + spriteWidth, v,
-	u, v + spriteHeight,
-	u + spriteWidth, v + spriteHeight
+		u + spriteWidth, v,
+		u, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v + spriteHeight
 	};
 	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 	glEnableVertexAttribArray(p.texCoordAttribute);
@@ -124,21 +124,21 @@ void insertInfinityShapeCoins(std::deque<std::vector<int>>& map) {
 
 std::vector<int> topCoins = { 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 void insertTopCoins(std::deque<std::vector<int>>& map) {
-	for (size_t i = 0; i < rand() % 5 + 5; i++) {
+	for (int i = 0; i < rand() % 5 + 5; i++) {
 		map.push_back(topCoins);
 	}
 }
 
 std::vector<int> bottomCoins = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0 };
 void insertBottomCoins(std::deque<std::vector<int>>& map) {
-	for (size_t i = 0; i < rand() % 5 + 5; i++) {
+	for (int i = 0; i < rand() % 5 + 5; i++) {
 		map.push_back(bottomCoins);
 	}
 }
 
 std::vector<int> middleCoins = { 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0 };
 void insertMiddleCoins(std::deque<std::vector<int>>& map) {
-	for (size_t i = 0; i < rand() % 5 + 5; i++) {
+	for (int i = 0; i < rand() % 5 + 5; i++) {
 		map.push_back(middleCoins);
 	}
 }
@@ -153,7 +153,20 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 	for (size_t x = 0; x < mapObjects.size(); x++) {
 		for (size_t y = 0; y < mapObjects[x].size(); y++) {
 			if (mapObjects[x][y] == 1) {
-				int spriteIndex = 8;
+				int spriteIndex;
+				float temp = fmod(animationTracker, 2.0f);
+				if (temp < 0.3f || temp > 1.7) {
+					spriteIndex = 8;
+				}
+				else if ((temp >= 0.3f && temp < 0.6f) || (temp > 1.4f && temp <= 1.7f)) {
+					spriteIndex = 9;
+				}
+				else if ((temp >= 0.6f && temp < 0.9f) || (temp > 1.1f && temp <= 1.4f)) {
+					spriteIndex = 10;
+				}
+				else {
+					spriteIndex = 11;
+				}
 				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
 				p.SetModelMatrix(modelMatrix);
 				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
@@ -176,7 +189,7 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				glEnableVertexAttribArray(p.texCoordAttribute);
 
 				glm::mat4 transformMatrix = identityMatrix;
-				float yPosition = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
+				float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
 				transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
 				transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 				p.SetModelMatrix(transformMatrix);
@@ -190,6 +203,7 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 
 void Map::update(float timeElapsed) {
 	xPositionOfHead -= speed * timeElapsed;
+	animationTracker += timeElapsed;
 	if (xPositionOfHead < -1.777f - (TILE_SIZE / 2) && mapObjects.size() > 0) {
 		mapObjects.pop_front();
 		xPositionOfHead += TILE_SIZE;
@@ -201,7 +215,7 @@ void Map::update(float timeElapsed) {
 
 void Map::insertNewPartIntoMap() {
 	int insertBlank = rand() % 4 + 6;
-	for (size_t i = 0; i < rand() % 4 + 6; i++) {
+	for (int i = 0; i < rand() % 4 + 6; i++) {
 		insertEmptySpace(mapObjects);
 	}
 	int nextInsertShape = rand() % 4;
@@ -225,7 +239,10 @@ void Map::insertNewPartIntoMap() {
 	}
 }
 
-Enemy::Enemy(float y) : Entity(1.777f, y, 7){ }
+Enemy::Enemy(float y, float w, float h) : Entity(1.6f, y, 12), width(w), height(h){
+	hitboxWidth = width * 0.95f;
+	hitboxHeight = height * 0.4f;
+}
 
 // returns true is it's past the screen
 bool Enemy::update(float timeElapsed, float targetY) {
@@ -240,6 +257,13 @@ bool Enemy::update(float timeElapsed, float targetY) {
 	}
 	else{
 		xPosition -= 3.0f * timeElapsed;
+		animationTracker += timeElapsed;
+		if (fmod(animationTracker, 0.2) < 0.1) {
+			spriteIndex = 13;
+		}
+		else {
+			spriteIndex = 14;
+		}
 		if (xPosition < -2.0f) {
 			return true;
 		}
@@ -247,7 +271,37 @@ bool Enemy::update(float timeElapsed, float targetY) {
 	return false;
 }
 
-Player::Player() : Entity(-0.7f, -0.6f, 1) {
+void Enemy::draw(ShaderProgram &p, const GLuint &texture) const {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+	glBindTexture(GL_TEXTURE_2D, texture);
+
+	float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
+	float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
+	float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
+	float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
+	float texCoords[] = {
+		u + spriteWidth, v,
+		u, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v,
+		u, v + spriteHeight,
+		u + spriteWidth, v + spriteHeight
+	};
+	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+	glEnableVertexAttribArray(p.texCoordAttribute);
+
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(width, height, 0.0f));
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
+Player::Player() : Entity(-0.7f, -0.6f, 4) {
 	hitboxWidth = TILE_SIZE * 0.75f;
 	hitboxHeight = TILE_SIZE * 0.75f;
 }
@@ -293,15 +347,30 @@ void Player::update(float timeElapsed) {
 		yVelocity += gravity * timeElapsed;
 	}
 	yPosition += yVelocity;
-	/*++spriteIndex;
-	if (spriteIndex >= 4) {
-		spriteIndex = 0;
-	}*/
+	if (animationTracker > 0.0f) {
+		animationTracker += timeElapsed;
+		float runSpeed = 0.7f;
+		float temp = fmod(animationTracker, runSpeed);
+		if (temp < runSpeed * 0.25f) {
+			spriteIndex = 0;
+		}
+		else if (temp >= runSpeed * 0.25f && temp < runSpeed * 0.5f) {
+			spriteIndex = 1;
+		}
+		else if (temp >= runSpeed * 0.5f && temp < runSpeed * 0.75f) {
+			spriteIndex = 2;
+		}
+		else {
+			spriteIndex = 3;
+		}
+	}
 }
 
 void Player::changeDirection() {
 	gravityDown = !gravityDown;
 	yVelocity = 0.0f;
+	spriteIndex = 4;
+	animationTracker = 0.0f;
 }
 void Player::checkInelasticCollision(const InelasticBox& box) {
 	float XDistBetweenBlockAndPlayer = fabs(box.xPosition - xPosition) - ((box.hitboxWidth + hitboxWidth) / 2);
@@ -315,7 +384,19 @@ void Player::checkInelasticCollision(const InelasticBox& box) {
 			yPosition += yPenetration + 0.00001f;
 		}
 		yVelocity = 0.0f;
+		animationTracker += 0.00001f;
 	}
+}
+
+bool Player::collideWithRocket(const Enemy& enemy) {
+	float XDistBetweenBlockAndPlayer = fabs(enemy.xPosition - xPosition) - ((enemy.hitboxWidth + hitboxWidth) / 2);
+	float YDistBetweenBlockAndPlayer = fabs(enemy.yPosition - yPosition) - ((enemy.hitboxHeight + hitboxHeight) / 2);
+	if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
+		yVelocity = 0.0f;
+		spriteIndex = 5;
+		return true;
+	}
+	return false;
 }
 
 size_t Player::checkMap(Map& map) {
@@ -332,14 +413,6 @@ size_t Player::checkMap(Map& map) {
 			if (map.mapObjects[x][y] == 1) {
 				float objectX = map.xPositionOfHead + (TILE_SIZE * x);
 				float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
-				// box box collision
-				/*float XDistBetweenBulletAndAlien = (float)abs(objectX - xPosition) - ((hitboxWidth + TILE_SIZE) / 2);
-				float YDistBetweenBulletAndAlien = (float)abs(objectY - yPosition) - ((hitboxHeight + TILE_SIZE) / 2);
-				if (XDistBetweenBulletAndAlien < 0.0f && YDistBetweenBulletAndAlien < 0.0f) {
-					map.mapObjects[x][y] = 0;
-					ret++;
-				}*/
-
 				//circle circle collision
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);

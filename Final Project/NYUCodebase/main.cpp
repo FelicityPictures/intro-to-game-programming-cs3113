@@ -60,6 +60,8 @@ int main(int argc, char *argv[]){
 
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
+	GLuint backgroundTexture1 = LoadTexture(RESOURCE_FOLDER"background1.png");
+	GLuint backgroundTexture2 = LoadTexture(RESOURCE_FOLDER"background2.png");
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glUseProgram(program.programID);
@@ -74,6 +76,8 @@ int main(int argc, char *argv[]){
 	vector<Enemy> enemies;
 	size_t score = 0;
 	char scoreText[] = "Score 0000";
+	float timeSurvived = 0.0f;
+	Background backgrounds = Background(backgroundTexture1, backgroundTexture2);
 
     SDL_Event event;
     bool done = false;
@@ -100,7 +104,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 				else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
-					enemies.push_back(Enemy(player.yPosition));
+					enemies.push_back(Enemy(player.yPosition, 0.5f, 0.5f));
 				}
 			}
         }
@@ -112,6 +116,8 @@ int main(int argc, char *argv[]){
 		lastFrameTicks = ticks;
 		while (timeAccumulator >= FIXED_TIMESTEP) {
 			timeAccumulator -= FIXED_TIMESTEP;
+
+			backgrounds.update(FIXED_TIMESTEP);
 			player.update(FIXED_TIMESTEP);
 			map.update(FIXED_TIMESTEP);
 			player.checkInelasticCollision(top);
@@ -122,10 +128,15 @@ int main(int argc, char *argv[]){
 					swap(enemies[i], enemies[enemies.size()-1]);
 					enemies.pop_back();
 				}
+				else {
+					player.collideWithRocket(enemies[i]);
+				}
 			}
+			timeSurvived += FIXED_TIMESTEP;
 		}
 
 		// DRAWING
+		backgrounds.draw(program);
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
 		map.draw(program, spriteSheet);

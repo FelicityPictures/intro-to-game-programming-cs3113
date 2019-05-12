@@ -67,9 +67,12 @@ private:
 
 class Enemy : public Entity {
 public:
+	float width;
+	float height;
 	float timeAlive = 0.0f;
-	Enemy(float y);
+	Enemy(float y, float w, float h);
 	bool update(float timeElapsed, float targetY);
+	void draw(ShaderProgram &p, const GLuint& texture) const;
 };
 
 class Player : public Entity {
@@ -82,5 +85,6 @@ public:
 	void update(float timeElapsed);
 	void changeDirection();
 	void checkInelasticCollision(const InelasticBox& box);
+	bool collideWithRocket(const Enemy& enemy);
 	size_t checkMap(Map& map);
 };
