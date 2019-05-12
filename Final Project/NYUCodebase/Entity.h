@@ -5,10 +5,6 @@
 #endif
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL_opengl.h>
-#include <string>
-#include <iostream>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <deque>
 #include <math.h>
@@ -39,6 +35,7 @@ public:
 
 class InelasticBox : public Entity {
 public:
+	InelasticBox();
 	InelasticBox(float x, float y, float width, float height);
 
 	void draw(ShaderProgram &p, const GLuint &texture) const;

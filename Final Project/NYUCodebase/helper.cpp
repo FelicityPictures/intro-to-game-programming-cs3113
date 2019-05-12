@@ -75,6 +75,8 @@ void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float
 }
 
 
+Background::Background() { }
+
 Background::Background(const GLuint& texture) {
 	backgrounds.push_back(texture);
 	backgrounds.push_back(texture);

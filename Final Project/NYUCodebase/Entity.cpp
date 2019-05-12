@@ -53,6 +53,8 @@ void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
 void Entity::update(float timeElapsed) {
 }
 
+InelasticBox::InelasticBox(){ }
+
 InelasticBox::InelasticBox(float x, float y, float width, float height)	: Entity(x, y, 6){
 	hitboxWidth = width;
 	hitboxHeight = height;
