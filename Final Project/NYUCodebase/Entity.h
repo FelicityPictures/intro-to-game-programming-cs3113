@@ -17,6 +17,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
 #include "stb_image.h"
+#include <SDL_mixer.h>
 
 class Entity {
 public:
@@ -59,7 +60,7 @@ public:
 	Map();
 	void draw(ShaderProgram &p, const GLuint &texture) const;
 
-	void update(float timeElapsed);
+	void update(float timeElapsed, float timeSurvived);
 
 private:
 	void insertNewPartIntoMap();
@@ -70,14 +71,16 @@ public:
 	float width;
 	float height;
 	float timeAlive = 0.0f;
+	bool launched = false;
 	Enemy(float y, float w, float h);
-	bool update(float timeElapsed, float targetY);
+	bool update(float timeElapsed, float targetY, float timeSurvived);
 	void draw(ShaderProgram &p, const GLuint& texture) const;
 };
 
 class Player : public Entity {
 public:
 	bool gravityDown = true;
+	float timeDead = 0.0f;
 
 	Player();
 	void draw(ShaderProgram &p, const GLuint &texture) const;

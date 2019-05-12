@@ -121,8 +121,8 @@ void Background::draw(ShaderProgram &p) const {
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
-void Background::update(float timeElapsed) {
-	currentX -= 1.25 * timeElapsed;
+void Background::update(float timeElapsed, float timeSurvived) {
+	currentX -= (speed + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
 	if (currentX < -3.777f) {
 		currentX = currentX + 4.0f;
 		backgrounds.push_back(backgrounds[0]);

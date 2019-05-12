@@ -25,11 +25,12 @@ class Background {
 public:
 	std::vector<GLuint> backgrounds;
 	float currentX = 0.0f;
+	float speed = 1.25f;
 	size_t currentBackground = 0;
 	Background(const GLuint& texture);
 	Background(const GLuint& texture1, const GLuint& texture2);
 
 	void addNewTexture(const GLuint& texture);
 	void draw(ShaderProgram &p) const;
-	void update(float timeElapsed);
+	void update(float timeElapsed, float timeSurvived);
 };

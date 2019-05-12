@@ -201,8 +201,8 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 	}
 }
 
-void Map::update(float timeElapsed) {
-	xPositionOfHead -= speed * timeElapsed;
+void Map::update(float timeElapsed, float timeSurvived) {
+	xPositionOfHead -= (speed + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
 	animationTracker += timeElapsed;
 	if (xPositionOfHead < -1.777f - (TILE_SIZE / 2) && mapObjects.size() > 0) {
 		mapObjects.pop_front();
@@ -245,7 +245,7 @@ Enemy::Enemy(float y, float w, float h) : Entity(1.6f, y, 12), width(w), height(
 }
 
 // returns true is it's past the screen
-bool Enemy::update(float timeElapsed, float targetY) {
+bool Enemy::update(float timeElapsed, float targetY, float timeSurvived) {
 	timeAlive += timeElapsed;
 	if (timeAlive <= 2.0f) {
 		if (targetY > yPosition) {
@@ -256,7 +256,13 @@ bool Enemy::update(float timeElapsed, float targetY) {
 		}
 	}
 	else{
-		xPosition -= 3.0f * timeElapsed;
+		if (!launched) {
+			launched = true;
+			Mix_Chunk *rocketSound;
+			rocketSound = Mix_LoadWAV("Missle_Launch.wav");
+			Mix_PlayChannel(-1, rocketSound, 0);
+		}
+		xPosition -= (3.0f + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
 		animationTracker += timeElapsed;
 		if (fmod(animationTracker, 0.2) < 0.1) {
 			spriteIndex = 13;
@@ -340,6 +346,12 @@ void Player::draw(ShaderProgram &p, const GLuint &texture) const {
 }
 
 void Player::update(float timeElapsed) {
+	if (timeDead > 0.0) {
+		timeDead += timeElapsed;
+		xPosition -= 0.5f * timeElapsed;
+		yPosition -= 0.5f * timeElapsed;
+		return;
+	}
 	if (gravityDown) {
 		yVelocity -= gravity * timeElapsed;
 	}
@@ -394,6 +406,7 @@ bool Player::collideWithRocket(const Enemy& enemy) {
 	if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
 		yVelocity = 0.0f;
 		spriteIndex = 5;
+		timeDead += 0.0001f;
 		return true;
 	}
 	return false;

@@ -53,10 +53,12 @@ int main(int argc, char *argv[]){
 	float heightRatio = 1.0f;
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
 	projectionMatrix = glm::ortho(-widthRatio, widthRatio, -heightRatio, heightRatio, -1.0f, 1.0f);
+
 	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
 	Mix_Music *bgm;
 	bgm = Mix_LoadMUS("bgm.mp3");
 	Mix_PlayMusic(bgm, -1);
+
 
 	GLuint spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	GLuint textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
@@ -77,6 +79,7 @@ int main(int argc, char *argv[]){
 	size_t score = 0;
 	char scoreText[] = "Score 0000";
 	float timeSurvived = 0.0f;
+	float rocketTimer = 0.0f;
 	Background backgrounds = Background(backgroundTexture1, backgroundTexture2);
 
     SDL_Event event;
@@ -117,22 +120,40 @@ int main(int argc, char *argv[]){
 		while (timeAccumulator >= FIXED_TIMESTEP) {
 			timeAccumulator -= FIXED_TIMESTEP;
 
-			backgrounds.update(FIXED_TIMESTEP);
 			player.update(FIXED_TIMESTEP);
-			map.update(FIXED_TIMESTEP);
-			player.checkInelasticCollision(top);
-			player.checkInelasticCollision(bottom);
-			score += player.checkMap(map);
-			for (size_t i = 0; i < enemies.size(); i++) {
-				if (enemies[i].update(FIXED_TIMESTEP, player.yPosition)) {
-					swap(enemies[i], enemies[enemies.size()-1]);
-					enemies.pop_back();
+			if (player.timeDead <= 0.0f) {
+				backgrounds.update(FIXED_TIMESTEP, timeSurvived);
+				map.update(FIXED_TIMESTEP, timeSurvived);
+				player.checkInelasticCollision(top);
+				player.checkInelasticCollision(bottom);
+				score += player.checkMap(map);
+				for (size_t i = 0; i < enemies.size(); i++) {
+					if (enemies[i].update(FIXED_TIMESTEP, player.yPosition, timeSurvived)) {
+						swap(enemies[i], enemies[enemies.size() - 1]);
+						enemies.pop_back();
+					}
+					else {
+						player.collideWithRocket(enemies[i]);
+					}
 				}
-				else {
-					player.collideWithRocket(enemies[i]);
+				int numberOfValidRockets = floor(score / 100.0);
+				if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f) {
+					int random = rand() % 5;
+					if (random > (5 - floorf(timeSurvived / 10.0f))) {
+						enemies.push_back(Enemy(player.yPosition, 0.5f, 0.5f));
+						rocketTimer = 0.0f;
+						if (enemies.size() >= numberOfValidRockets) {
+							rocketTimer = -10.0f;
+						}
+					}
 				}
+				rocketTimer += FIXED_TIMESTEP;
+				timeSurvived += FIXED_TIMESTEP;
 			}
-			timeSurvived += FIXED_TIMESTEP;
+			else {
+				Mix_HaltMusic();
+			}
+			
 		}
 
 		// DRAWING
