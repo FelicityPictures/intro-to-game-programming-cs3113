@@ -17,6 +17,11 @@ GameState::GameState() {
 	titleScreenButtons[1] = Button("2 Players", 0.12f, 0.0f, -0.65f, 255.0f, 0.0f, 0.0f);
 	titleScreenButtons[2] = Button("Quit", 0.1f, 0.0f, -0.9f, 255.0f, 0.0f, 0.0f);
 
+	gameOverScreen = LoadTexture(RESOURCE_FOLDER"GameOverScreen-02.png");
+	gameOverButtons[0] = Button("Play Again", 0.25f, 0.0f, -0.35f, 101.0f, 115.0f, 137.0f);
+	gameOverButtons[1] = Button("Main Menu", 0.12f, -0.3f, -0.75f, 255.0f, 0.0f, 0.0f);
+	gameOverButtons[2] = Button("Quit", 0.12f, 0.4f, -0.75f, 255.0f, 0.0f, 0.0f);
+
 	spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
 	glEnable(GL_BLEND);
@@ -31,6 +36,13 @@ GameState::GameState() {
 }
 
 void GameState::RenderGame(int mode) {
+	int temporaryScore;
+	char scoreText[] = "Score 0000";
+	temporaryScore = score;
+	for (int i = 0; i < 4; i++) {
+		scoreText[9 - i] = '0' + (temporaryScore % 10);
+		temporaryScore = floor(temporaryScore / 10);
+	}
 	switch (mode) {
 	case GameMode::STATE_MAIN_MENU:
 		imageForWholeScreen(program, titleScreen);
@@ -40,7 +52,6 @@ void GameState::RenderGame(int mode) {
 		}
 		break;
 	case GameMode::STATE_SINGLE_PLAYER_PLAY:
-		//DRAW THINGS
 		backgrounds.draw(program);
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
@@ -49,13 +60,17 @@ void GameState::RenderGame(int mode) {
 		for (size_t i = 0; i < enemies.size(); i++) {
 			enemies[i].draw(program, spriteSheet);
 		}
-		int temporaryScore = score;
-		char scoreText[] = "Score 0000";
-		for (int i = 0; i < 4; i++) {
-			scoreText[9 - i] = '0' + (temporaryScore % 10);
-			temporaryScore = floor(temporaryScore / 10);
-		}
 		drawText(program, textSheet, scoreText, -1.7f, 0.95f, 0.05f);
+		break;
+	case GameMode::STATE_SINGLE_PLAYER_GAME_OVER:
+		imageForWholeScreen(program, gameOverScreen);
+		for (size_t i = 0; i < 3; i++) {
+			gameOverButtons[i].draw(program, untexturedProgram, textSheet);
+		}
+		float height = 0.1f;
+		float xPositionOfText = 0.0f - (float(strlen(scoreText) / 2.0f) * height) + (height / 2);
+		float yPositionOfText = 0.1f - (height / 2);
+		drawText(program, textSheet, scoreText, xPositionOfText, yPositionOfText, height);
 		break;
 	}
 }
@@ -93,7 +108,7 @@ bool GameState::UpdateGame(float elapsed) {
 	}
 	else {
 		Mix_HaltMusic();
-		if (player.xPosition < -1.777f) {
+		if (player.xPosition < -1.777f || player.yPosition < -1.0f) {
 			return true;
 		}
 	}
@@ -102,4 +117,15 @@ bool GameState::UpdateGame(float elapsed) {
 
 void GameState::ProcessInput(float elapsed) {
 	return;
+}
+
+void GameState::reset() {
+	Background backgrounds;
+
+	player = Player();
+	map = Map();
+	enemies.clear();
+	score = 0;
+	timeSurvived = 0.0f;
+	rocketTimer = 0.0f;
 }

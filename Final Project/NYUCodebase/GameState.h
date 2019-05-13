@@ -26,6 +26,9 @@ public:
 	GLuint titleScreen;
 	Button titleScreenButtons[3];
 
+	GLuint gameOverScreen;
+	Button gameOverButtons[3];
+
 	GLuint spriteSheet, textSheet;
 	Background backgrounds;
 
@@ -41,4 +44,6 @@ public:
 	void RenderGame(int mode);
 	bool UpdateGame(float elapsed);
 	void ProcessInput(float elapsed);
+
+	void reset();
 };

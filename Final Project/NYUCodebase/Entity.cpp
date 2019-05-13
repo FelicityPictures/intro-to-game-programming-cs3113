@@ -295,10 +295,10 @@ Enemy::Enemy(float y, float w, float h) : Entity(1.6f, y, 12), width(w), height(
 bool Enemy::update(float timeElapsed, float targetY, float timeSurvived) {
 	timeAlive += timeElapsed;
 	if (timeAlive <= 2.0f) {
-		if (targetY > yPosition) {
+		if (targetY > yPosition && targetY - yPosition > 1.2f * timeElapsed) {
 			yPosition += 1.2f * timeElapsed;
 		}
-		else {
+		else if (targetY < yPosition && yPosition - targetY > 1.2f * timeElapsed) {
 			yPosition -= 1.2f * timeElapsed;
 		}
 	}

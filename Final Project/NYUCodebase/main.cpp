@@ -60,6 +60,7 @@ int main(int argc, char *argv[]){
 	GameState state = GameState();
 	int mode = GameMode::STATE_MAIN_MENU;
 	//int mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
+	//int mode = GameMode::STATE_SINGLE_PLAYER_GAME_OVER;
 	state.program.SetProjectionMatrix(projectionMatrix);
 	state.program.SetViewMatrix(viewMatrix);
 	state.untexturedProgram.SetProjectionMatrix(projectionMatrix);
@@ -81,7 +82,23 @@ int main(int argc, char *argv[]){
 					if (state.titleScreenButtons[0].clicked(unitX, unitY)) {
 						mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
 					}
+					else if (state.titleScreenButtons[1].clicked(unitX, unitY)) {
+						//MULTIPLAYER
+					}
 					else if (state.titleScreenButtons[2].clicked(unitX, unitY)) {
+						done = true;
+					}
+				}
+				else if (mode == GameMode::STATE_SINGLE_PLAYER_GAME_OVER) {
+					if (state.gameOverButtons[0].clicked(unitX, unitY)) {
+						state.reset();
+						mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
+					}
+					else if (state.gameOverButtons[1].clicked(unitX, unitY)) {
+						state.reset();
+						mode = GameMode::STATE_MAIN_MENU;
+					}
+					else if (state.gameOverButtons[2].clicked(unitX, unitY)) {
 						done = true;
 					}
 				}
