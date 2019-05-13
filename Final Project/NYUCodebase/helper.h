@@ -18,6 +18,7 @@ GLuint LoadTexture(const char *filePath);
 float lerp(float v0, float v1, float t);
 
 void drawText(ShaderProgram &p, const GLuint &texture, char* str, float x, float y, float height);
+void drawText(ShaderProgram &p, const GLuint &texture, const std::string& str, float x, float y, float height);
 
 void imageForWholeScreen(ShaderProgram &p, GLuint &texture);
 
@@ -42,10 +43,10 @@ public:
 	float xPosition, yPosition;
 	float height;
 	float red, green, blue;
-	char* text;
+	std::string text;
 
 	Button();
-	Button(char* text, float height, float x, float y, float red, float green, float blue);
+	Button(char* newtext, float height, float x, float y, float red, float green, float blue);
 
 	void draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture);
 };

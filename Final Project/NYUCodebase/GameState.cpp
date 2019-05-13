@@ -13,7 +13,7 @@ GameState::GameState() {
 
 	titleScreen = LoadTexture(RESOURCE_FOLDER"TitleScreen-01.png");
 	//char text[], float height, float x, float y, float red, float green, float blue
-	titleScreenButtons[0] = Button("Play", 0.25f, 0.0f, -0.25f, 255.0, 0.0f, 0.0f);
+	titleScreenButtons[0] = Button("Single Player", 0.25f, 0.0f, -0.35f, 255.0, 0.0f, 0.0f);
 	titleScreenButtons[1] = Button("Play", 0.15f, 0.0f, 0.25f, 255.0, 0.0f, 0.0f);
 	titleScreenButtons[2] = Button("Play", 0.15f, 0.0f, 0.5f, 255.0, 0.0f, 0.0f);
 

@@ -58,8 +58,8 @@ int main(int argc, char *argv[]){
 	float timeAccumulator = 0.0f;
 
 	GameState state = GameState();
-	//int mode = GameMode::STATE_MAIN_MENU;
-	int mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
+	int mode = GameMode::STATE_MAIN_MENU;
+	//int mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
 	state.program.SetProjectionMatrix(projectionMatrix);
 	state.program.SetViewMatrix(viewMatrix);
 	state.untexturedProgram.SetProjectionMatrix(projectionMatrix);

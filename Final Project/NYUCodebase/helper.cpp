@@ -74,6 +74,40 @@ void drawText(ShaderProgram &p, const GLuint &texture, char* str, float x, float
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
+void drawText(ShaderProgram &p, const GLuint &texture, const std::string& str, float x, float y, float height) {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+
+	float u, v;
+	float spriteWidth = 1.0f / (float)LETTER_COUNT_X;
+	float spriteHeight = 1.0f / (float)LETTER_COUNT_Y;
+	glBindTexture(GL_TEXTURE_2D, texture);
+	for (int i = 0; i < str.size(); i++) {
+		u = (float)(str[i] % LETTER_COUNT_X) / (float)LETTER_COUNT_X;
+		v = (float)(str[i] / LETTER_COUNT_X) / (float)LETTER_COUNT_Y;
+		float texCoords[] = {
+			u + spriteWidth, v,
+			u, v,
+			u, v + spriteHeight,
+			u + spriteWidth, v,
+			u, v + spriteHeight,
+			u + spriteWidth, v + spriteHeight
+		};
+		glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+		glEnableVertexAttribArray(p.texCoordAttribute);
+		glm::mat4 transformMatrix;
+		transformMatrix = identityMatrix;
+		transformMatrix = glm::translate(transformMatrix, glm::vec3(x + (height * i), y, 0.0f));
+		transformMatrix = glm::scale(transformMatrix, glm::vec3(height, height, 0.0f));
+		p.SetModelMatrix(transformMatrix);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
+
+
 void imageForWholeScreen(ShaderProgram &p, GLuint &texture) {
 	p.SetModelMatrix(modelMatrix);
 	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
@@ -150,9 +184,9 @@ void Background::update(float timeElapsed, float timeSurvived) {
 
 Button::Button(){ }
 
-Button::Button(char* text, float height, float x, float y, float red, float green, float blue) :
+Button::Button(char* newtext, float height, float x, float y, float red, float green, float blue) :
 	height(height), xPosition(x), yPosition(y), red(red), green(green), blue(blue){
-	text = text;
+	text = newtext;
 }
 
 void Button::draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture) {
@@ -164,11 +198,15 @@ void Button::draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture) {
 	u.SetColor(red / 255.0f, blue / 255.0f, green / 255.0f, 1.0f);
 	glm::mat4 transformMatrix = identityMatrix;
 	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
-	transformMatrix = glm::scale(transformMatrix, glm::vec3(1.0f, 1.0f, 0.0f));
+
+	float sizeOfLetters = height * 0.5f;
+	transformMatrix = glm::scale(transformMatrix, glm::vec3((text.size() + 1)*sizeOfLetters, height, 0.0f));
 	u.SetModelMatrix(transformMatrix);
 	glDrawArrays(GL_TRIANGLES, 0, 6);
 	glDisableVertexAttribArray(u.positionAttribute);
 
 	glUseProgram(p.programID);
-	drawText(p, texture, text, xPosition, yPosition, height);
+	float leftSideTextPlacement = xPosition - (float(text.size() / 2.0f) * sizeOfLetters) + (sizeOfLetters / 2);
+	drawText(p, texture, text, leftSideTextPlacement, yPosition, sizeOfLetters);
+	//drawText(p, texture, text, xPosition, yPosition, height*0.75f);
 }
