@@ -20,7 +20,11 @@ enum GameMode { STATE_MAIN_MENU, STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_G
 class GameState {
 public:
 	ShaderProgram program;
+	ShaderProgram untexturedProgram;
 	Mix_Music *bgm;
+
+	GLuint titleScreen;
+	Button titleScreenButtons[3];
 
 	GLuint spriteSheet, textSheet;
 	Background backgrounds;

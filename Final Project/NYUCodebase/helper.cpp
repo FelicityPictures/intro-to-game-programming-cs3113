@@ -41,17 +41,16 @@ float lerp(float v0, float v1, float t) {
 	return (1.0f - t)*v0 + t * v1;
 }
 
-void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height) {
+void drawText(ShaderProgram &p, const GLuint &texture, char* str, float x, float y, float height) {
 	p.SetModelMatrix(modelMatrix);
 	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
 	glEnableVertexAttribArray(p.positionAttribute);
 
-	glm::mat4 transformMatrix;
 	float u, v;
 	float spriteWidth = 1.0f / (float)LETTER_COUNT_X;
 	float spriteHeight = 1.0f / (float)LETTER_COUNT_Y;
 	glBindTexture(GL_TEXTURE_2D, texture);
-	for (int i = 0; i < strLength; i++) {
+	for (int i = 0; i < strlen(str); i++) {
 		u = (float)(str[i] % LETTER_COUNT_X) / (float)LETTER_COUNT_X;
 		v = (float)(str[i] / LETTER_COUNT_X) / (float)LETTER_COUNT_Y;
 		float texCoords[] = {
@@ -64,6 +63,7 @@ void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float
 		};
 		glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 		glEnableVertexAttribArray(p.texCoordAttribute);
+		glm::mat4 transformMatrix;
 		transformMatrix = identityMatrix;
 		transformMatrix = glm::translate(transformMatrix, glm::vec3(x + (height * i), y, 0.0f));
 		transformMatrix = glm::scale(transformMatrix, glm::vec3(height, height, 0.0f));
@@ -74,6 +74,22 @@ void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
+void imageForWholeScreen(ShaderProgram &p, GLuint &texture) {
+	p.SetModelMatrix(modelMatrix);
+	glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(p.positionAttribute);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	float texCoords[] = { 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f };
+	glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
+	glEnableVertexAttribArray(p.texCoordAttribute);
+
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(3.554f, 2.0f, 0.0f));
+	p.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(p.positionAttribute);
+	glDisableVertexAttribArray(p.texCoordAttribute);
+}
 
 Background::Background() { }
 
@@ -124,10 +140,35 @@ void Background::draw(ShaderProgram &p) const {
 }
 
 void Background::update(float timeElapsed, float timeSurvived) {
-	currentX -= (speed + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
+	currentX -= (speed + (0.1f * floorf(timeSurvived / 5.0f))) * timeElapsed;
 	if (currentX < -3.777f) {
 		currentX = currentX + 4.0f;
 		backgrounds.push_back(backgrounds[0]);
 		backgrounds.erase(backgrounds.begin());
 	}
+}
+
+Button::Button(){ }
+
+Button::Button(char* text, float height, float x, float y, float red, float green, float blue) :
+	height(height), xPosition(x), yPosition(y), red(red), green(green), blue(blue){
+	text = text;
+}
+
+void Button::draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture) {
+	glUseProgram(u.programID);
+	u.SetModelMatrix(modelMatrix);
+
+	glVertexAttribPointer(u.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+	glEnableVertexAttribArray(u.positionAttribute);
+	u.SetColor(red / 255.0f, blue / 255.0f, green / 255.0f, 1.0f);
+	glm::mat4 transformMatrix = identityMatrix;
+	transformMatrix = glm::translate(transformMatrix, glm::vec3(xPosition, yPosition, 0.0f));
+	transformMatrix = glm::scale(transformMatrix, glm::vec3(1.0f, 1.0f, 0.0f));
+	u.SetModelMatrix(transformMatrix);
+	glDrawArrays(GL_TRIANGLES, 0, 6);
+	glDisableVertexAttribArray(u.positionAttribute);
+
+	glUseProgram(p.programID);
+	drawText(p, texture, text, xPosition, yPosition, height);
 }

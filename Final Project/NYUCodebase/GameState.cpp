@@ -8,7 +8,14 @@
 
 GameState::GameState() {
 	program.Load(RESOURCE_FOLDER"vertex_textured.glsl", RESOURCE_FOLDER"fragment_textured.glsl");
+	untexturedProgram.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 	glUseProgram(program.programID);
+
+	titleScreen = LoadTexture(RESOURCE_FOLDER"TitleScreen-01.png");
+	//char text[], float height, float x, float y, float red, float green, float blue
+	titleScreenButtons[0] = Button("Play", 0.25f, 0.0f, -0.25f, 255.0, 0.0f, 0.0f);
+	titleScreenButtons[1] = Button("Play", 0.15f, 0.0f, 0.25f, 255.0, 0.0f, 0.0f);
+	titleScreenButtons[2] = Button("Play", 0.15f, 0.0f, 0.5f, 255.0, 0.0f, 0.0f);
 
 	spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
@@ -26,8 +33,11 @@ GameState::GameState() {
 void GameState::RenderGame(int mode) {
 	switch (mode) {
 	case GameMode::STATE_MAIN_MENU:
-		drawText(program, textSheet, "Space Invaders", 14, -1.625f, 0.0f, 0.25f);
-		drawText(program, textSheet, "Press space to begin.", 21, -1.0f, -0.5f, 0.1f);
+		imageForWholeScreen(program, titleScreen);
+		titleScreenButtons[0].draw(program, untexturedProgram, textSheet);
+		/*for (size_t i = 0; i < 3; i++) {
+			titleScreenButtons[i].draw(program, textSheet);
+		}*/
 		break;
 	case GameMode::STATE_SINGLE_PLAYER_PLAY:
 		//DRAW THINGS
@@ -45,7 +55,7 @@ void GameState::RenderGame(int mode) {
 			scoreText[9 - i] = '0' + (temporaryScore % 10);
 			temporaryScore = floor(temporaryScore / 10);
 		}
-		drawText(program, textSheet, scoreText, 10, -1.7f, 0.95f, 0.05f);
+		drawText(program, textSheet, scoreText, -1.7f, 0.95f, 0.05f);
 		break;
 	}
 }

@@ -58,9 +58,12 @@ int main(int argc, char *argv[]){
 	float timeAccumulator = 0.0f;
 
 	GameState state = GameState();
+	//int mode = GameMode::STATE_MAIN_MENU;
 	int mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
 	state.program.SetProjectionMatrix(projectionMatrix);
 	state.program.SetViewMatrix(viewMatrix);
+	state.untexturedProgram.SetProjectionMatrix(projectionMatrix);
+	state.untexturedProgram.SetViewMatrix(viewMatrix);
 
     SDL_Event event;
     bool done = false;
@@ -91,12 +94,14 @@ int main(int argc, char *argv[]){
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// TIMING and UPDATE
-		float ticks = (float)SDL_GetTicks() / 1000.0f;
-		timeAccumulator += ticks - lastFrameTicks;
-		lastFrameTicks = ticks;
-		while (timeAccumulator >= FIXED_TIMESTEP) {
-			state.UpdateGame(FIXED_TIMESTEP);
-			timeAccumulator -= FIXED_TIMESTEP;
+		if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+			float ticks = (float)SDL_GetTicks() / 1000.0f;
+			timeAccumulator += ticks - lastFrameTicks;
+			lastFrameTicks = ticks;
+			while (timeAccumulator >= FIXED_TIMESTEP) {
+				state.UpdateGame(FIXED_TIMESTEP);
+				timeAccumulator -= FIXED_TIMESTEP;
+			}
 		}
 
 		// DRAWING

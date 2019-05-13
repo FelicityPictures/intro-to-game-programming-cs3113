@@ -6,6 +6,7 @@
 #define GL_GLEXT_PROTOTYPES 1
 #include <SDL_opengl.h>
 #include <vector>
+#include <string>
 #include "glm/mat4x4.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "ShaderProgram.h"
@@ -16,7 +17,9 @@ GLuint LoadTexture(const char *filePath);
 
 float lerp(float v0, float v1, float t);
 
-void drawText(ShaderProgram &p, GLuint &texture, char* str, int strLength, float x, float y, float height);
+void drawText(ShaderProgram &p, const GLuint &texture, char* str, float x, float y, float height);
+
+void imageForWholeScreen(ShaderProgram &p, GLuint &texture);
 
 class Background {
 public:
@@ -32,4 +35,17 @@ public:
 	void addNewTexture(const GLuint& texture);
 	void draw(ShaderProgram &p) const;
 	void update(float timeElapsed, float timeSurvived);
+};
+
+class Button {
+public:
+	float xPosition, yPosition;
+	float height;
+	float red, green, blue;
+	char* text;
+
+	Button();
+	Button(char* text, float height, float x, float y, float red, float green, float blue);
+
+	void draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture);
 };
