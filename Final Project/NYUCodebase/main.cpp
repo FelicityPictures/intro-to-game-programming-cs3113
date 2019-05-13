@@ -48,12 +48,6 @@ int main(int argc, char *argv[]){
 	glViewport(0, 0, 640, 360);
 	projectionMatrix = glm::ortho(-1.777f, 1.777f, -1.0f, 1.0f, -1.0f, 1.0f);
 
-	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
-	Mix_Music *bgm;
-	bgm = Mix_LoadMUS("bgm.mp3");
-	Mix_PlayMusic(bgm, -1);
-
-
 	float lastFrameTicks = 0.0f;
 	float timeAccumulator = 0.0f;
 

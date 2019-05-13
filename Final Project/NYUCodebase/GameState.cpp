@@ -11,6 +11,10 @@ GameState::GameState() {
 	untexturedProgram.Load(RESOURCE_FOLDER"vertex.glsl", RESOURCE_FOLDER"fragment.glsl");
 	glUseProgram(program.programID);
 
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 4096);
+	bgm = Mix_LoadMUS("bgm.mp3");
+	Mix_PlayMusic(bgm, -1);
+
 	titleScreen = LoadTexture(RESOURCE_FOLDER"TitleScreen-01.png");
 	//char text[], float height, float x, float y, float red, float green, float blue
 	titleScreenButtons[0] = Button("Play!", 0.25f, 0.0f, -0.35f, 101.0f, 115.0f, 137.0f);
@@ -32,7 +36,6 @@ GameState::GameState() {
 	top = InelasticBox(0.0f, 1.0 - 0.05f, (640.0f / 360.0f) * 2.0f, 0.1f);
 	bottom = InelasticBox(0.0f, (-1.0) + 0.05f, (640.0f / 360.0f) * 2.0f, 0.1f);
 	bottom.spriteIndex = 7;
-
 }
 
 void GameState::RenderGame(int mode) {
@@ -128,4 +131,6 @@ void GameState::reset() {
 	score = 0;
 	timeSurvived = 0.0f;
 	rocketTimer = 0.0f;
+
+	Mix_PlayMusic(bgm, -1);
 }

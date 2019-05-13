@@ -250,7 +250,7 @@ void Map::update(float timeElapsed, float timeSurvived) {
 
 void Map::insertNewPartIntoMap() {
 	int insertBlank = rand() % 4 + 6;
-	for (int i = 0; i < rand() % 6 + 1; i++) {
+	for (int i = 0; i < rand() % 6 + 3; i++) {
 		insertEmptySpace(mapObjects);
 	}
 	int nextInsertShape = rand() % 7;
