@@ -39,6 +39,6 @@ public:
 
 	GameState();
 	void RenderGame(int mode);
-	void UpdateGame(float elapsed);
+	bool UpdateGame(float elapsed);
 	void ProcessInput(float elapsed);
 };

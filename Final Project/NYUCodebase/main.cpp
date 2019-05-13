@@ -74,8 +74,20 @@ int main(int argc, char *argv[]){
 			if (event.type == SDL_QUIT || event.type == SDL_WINDOWEVENT_CLOSE) {
 				done = true;
 			}
+			else if (event.type == SDL_MOUSEBUTTONDOWN) {
+				float unitX = (((float)event.button.x / 640.0f) * 3.554f) - 1.777f;
+				float unitY = (((float)(360 - event.button.y) / 360.0f) * 2.0f) - 1.0f;
+				if (mode == GameMode::STATE_MAIN_MENU) {
+					if (state.titleScreenButtons[0].clicked(unitX, unitY)) {
+						mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
+					}
+					else if (state.titleScreenButtons[2].clicked(unitX, unitY)) {
+						done = true;
+					}
+				}
+			}
 			else if (event.type == SDL_KEYDOWN) {
-				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player.timeDead <= 0.0f) {
 					state.player.changeDirection();
 					if (state.player.gravityDown) {
 						state.bottom.spriteIndex = 7;
@@ -94,15 +106,17 @@ int main(int argc, char *argv[]){
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// TIMING and UPDATE
+		float ticks = (float)SDL_GetTicks() / 1000.0f;
 		if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
-			float ticks = (float)SDL_GetTicks() / 1000.0f;
 			timeAccumulator += ticks - lastFrameTicks;
-			lastFrameTicks = ticks;
 			while (timeAccumulator >= FIXED_TIMESTEP) {
-				state.UpdateGame(FIXED_TIMESTEP);
+				if (state.UpdateGame(FIXED_TIMESTEP)) {
+					mode = GameMode::STATE_SINGLE_PLAYER_GAME_OVER;
+				}
 				timeAccumulator -= FIXED_TIMESTEP;
 			}
 		}
+		lastFrameTicks = ticks;
 
 		// DRAWING
 		state.RenderGame(mode);

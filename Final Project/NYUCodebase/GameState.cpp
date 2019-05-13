@@ -13,9 +13,9 @@ GameState::GameState() {
 
 	titleScreen = LoadTexture(RESOURCE_FOLDER"TitleScreen-01.png");
 	//char text[], float height, float x, float y, float red, float green, float blue
-	titleScreenButtons[0] = Button("Single Player", 0.25f, 0.0f, -0.35f, 255.0, 0.0f, 0.0f);
-	titleScreenButtons[1] = Button("Play", 0.15f, 0.0f, 0.25f, 255.0, 0.0f, 0.0f);
-	titleScreenButtons[2] = Button("Play", 0.15f, 0.0f, 0.5f, 255.0, 0.0f, 0.0f);
+	titleScreenButtons[0] = Button("Play!", 0.25f, 0.0f, -0.35f, 101.0f, 115.0f, 137.0f);
+	titleScreenButtons[1] = Button("2 Players", 0.12f, 0.0f, -0.65f, 255.0f, 0.0f, 0.0f);
+	titleScreenButtons[2] = Button("Quit", 0.1f, 0.0f, -0.9f, 255.0f, 0.0f, 0.0f);
 
 	spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
@@ -34,10 +34,10 @@ void GameState::RenderGame(int mode) {
 	switch (mode) {
 	case GameMode::STATE_MAIN_MENU:
 		imageForWholeScreen(program, titleScreen);
-		titleScreenButtons[0].draw(program, untexturedProgram, textSheet);
-		/*for (size_t i = 0; i < 3; i++) {
-			titleScreenButtons[i].draw(program, textSheet);
-		}*/
+		//titleScreenButtons[0].draw(program, untexturedProgram, textSheet);
+		for (size_t i = 0; i < 3; i++) {
+			titleScreenButtons[i].draw(program, untexturedProgram, textSheet);
+		}
 		break;
 	case GameMode::STATE_SINGLE_PLAYER_PLAY:
 		//DRAW THINGS
@@ -60,7 +60,7 @@ void GameState::RenderGame(int mode) {
 	}
 }
 
-void GameState::UpdateGame(float elapsed) {
+bool GameState::UpdateGame(float elapsed) {
 	player.update(elapsed);
 	if (player.timeDead <= 0.0f) {
 		backgrounds.update(elapsed, timeSurvived);
@@ -93,7 +93,11 @@ void GameState::UpdateGame(float elapsed) {
 	}
 	else {
 		Mix_HaltMusic();
+		if (player.xPosition < -1.777f) {
+			return true;
+		}
 	}
+	return false;
 }
 
 void GameState::ProcessInput(float elapsed) {

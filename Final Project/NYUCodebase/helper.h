@@ -48,5 +48,6 @@ public:
 	Button();
 	Button(char* newtext, float height, float x, float y, float red, float green, float blue);
 
+	bool clicked(float clickX, float clickY);
 	void draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture);
 };

@@ -189,6 +189,17 @@ Button::Button(char* newtext, float height, float x, float y, float red, float g
 	text = newtext;
 }
 
+bool Button::clicked(float clickX, float clickY) {
+	float sizeOfLetters = height * 0.5f;
+	float halfWidth = (text.size() + 1) * sizeOfLetters;
+	float halfHeight = height / 2;
+	if ((clickX > xPosition - halfWidth) && (clickX < xPosition + halfWidth) &&
+		(clickY > yPosition - halfHeight) && (clickY < yPosition + halfHeight) ) {
+		return true;
+	}
+	return false;
+}
+
 void Button::draw(ShaderProgram& p, ShaderProgram& u, const GLuint& texture) {
 	glUseProgram(u.programID);
 	u.SetModelMatrix(modelMatrix);
