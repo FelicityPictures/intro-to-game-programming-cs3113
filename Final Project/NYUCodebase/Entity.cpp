@@ -449,7 +449,7 @@ size_t Player::checkMap(Map& map) {
 	//1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f)
 	int lowerY = floor(almostY);
 	char buf[255];
-	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
+	for (size_t x = 5; x < 10 && x < map.mapObjects.size(); x++) {
 		for (size_t y = max(0, lowerY - 1); y < lowerY + 5 && y < map.mapObjects[x].size(); y++) {
 		//for (size_t y = 0; y < 12; y++) {
 			float objectX = map.xPositionOfHead + float(TILE_SIZE * x);

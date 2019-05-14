@@ -97,20 +97,18 @@ int main(int argc, char *argv[]){
 					}
 				}
 			}
-			else if (event.type == SDL_KEYDOWN) {
-				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player[0].timeDead <= 0.0f) {
-					state.player[0].changeDirection();
-					if (state.player[0].gravityDown) {
-						state.bottom.spriteIndex = 7;
-						state.top.spriteIndex = 6;
-					}
-					else {
-						state.bottom.spriteIndex = 6;
-						state.top.spriteIndex = 7;
+			else if (event.type == SDL_KEYUP) {
+				if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player[0].timeDead <= 0.0f) {
+						state.player[0].changeDirection();
 					}
 				}
-				else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
-					state.enemies.push_back(Enemy(state.player[0].yPosition, 0.5f, 0.5f));
+				else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_L && state.player[0].timeDead <= 0.0f) {
+						state.player[0].changeDirection();
+					}else if (event.key.keysym.scancode == SDL_SCANCODE_A && state.player[1].timeDead <= 0.0f) {
+						state.player[1].changeDirection();
+					}
 				}
 			}
         }

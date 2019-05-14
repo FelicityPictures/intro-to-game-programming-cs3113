@@ -42,10 +42,10 @@ GameState::GameState() {
 
 void GameState::RenderGame(int mode) {
 	int temporaryScore;
-	char scoreText[] = "Score 0000";
+	char P1scoreText[] = "Score 0000";
 	temporaryScore = P1score;
 	for (int i = 0; i < 4; i++) {
-		scoreText[9 - i] = '0' + (temporaryScore % 10);
+		P1scoreText[9 - i] = '0' + (temporaryScore % 10);
 		temporaryScore = floor(temporaryScore / 10);
 	}
 	if (mode == GameMode::STATE_MAIN_MENU) {
@@ -63,10 +63,16 @@ void GameState::RenderGame(int mode) {
 			enemies[i].draw(program, spriteSheet);
 		}
 		player[0].draw(program, spriteSheet);
-		drawText(program, textSheet, scoreText, -1.7f, 0.95f, 0.05f);
+		drawText(program, textSheet, P1scoreText, -1.7f, 0.95f, 0.05f);
 		if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 			player[1].draw(program, spriteSheet);
-			drawText(program, textSheet, scoreText, 1.5f, 0.95f, 0.05f);
+			char P2scoreText[] = "Score 0000";
+			temporaryScore = P2score;
+			for (int i = 0; i < 4; i++) {
+				P2scoreText[9 - i] = '0' + (temporaryScore % 10);
+				temporaryScore = floor(temporaryScore / 10);
+			}
+			drawText(program, textSheet, P2scoreText, 1.2f, 0.95f, 0.05f);
 		}
 	}
 	else if (mode == GameMode::STATE_SINGLE_PLAYER_GAME_OVER) {
@@ -75,9 +81,9 @@ void GameState::RenderGame(int mode) {
 			gameOverButtons[i].draw(program, untexturedProgram, textSheet);
 		}
 		float height = 0.1f;
-		float xPositionOfText = 0.0f - (float(strlen(scoreText) / 2.0f) * height) + (height / 2);
+		float xPositionOfText = 0.0f - (float(strlen(P1scoreText) / 2.0f) * height) + (height / 2);
 		float yPositionOfText = 0.1f - (height / 2);
-		drawText(program, textSheet, scoreText, xPositionOfText, yPositionOfText, height);
+		drawText(program, textSheet, P1scoreText, xPositionOfText, yPositionOfText, height);
 	}
 }
 
