@@ -63,7 +63,7 @@ void GameState::RenderGame(int mode) {
 			enemies[i].draw(program, spriteSheet);
 		}
 		player[0].draw(program, spriteSheet);
-		drawText(program, textSheet, P1scoreText, 1.2f, 0.95f, 0.05f);
+		drawText(program, textSheet, P1scoreText, -1.7f, 0.95f, 0.05f);
 		if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 			player[1].draw(program, spriteSheet);
 			char P2scoreText[] = "Score 0000";
@@ -72,7 +72,7 @@ void GameState::RenderGame(int mode) {
 				P2scoreText[9 - i] = '0' + (temporaryScore % 10);
 				temporaryScore = floor(temporaryScore / 10);
 			}
-			drawText(program, textSheet, P2scoreText, -1.7f, 0.95f, 0.05f);
+			drawText(program, textSheet, P2scoreText, -1.7f, -0.95f, 0.05f);
 		}
 	}
 	else if (mode == GameMode::STATE_SINGLE_PLAYER_GAME_OVER) {
