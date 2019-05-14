@@ -53,8 +53,6 @@ int main(int argc, char *argv[]){
 
 	GameState state = GameState();
 	int mode = GameMode::STATE_MAIN_MENU;
-	//int mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
-	//int mode = GameMode::STATE_SINGLE_PLAYER_GAME_OVER;
 	state.program.SetProjectionMatrix(projectionMatrix);
 	state.program.SetViewMatrix(viewMatrix);
 	state.untexturedProgram.SetProjectionMatrix(projectionMatrix);
@@ -115,12 +113,29 @@ int main(int argc, char *argv[]){
 					if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player[0].timeDead <= 0.0f) {
 						state.player[0].changeDirection();
 					}
+					else if (event.key.keysym.scancode == SDL_SCANCODE_P && state.player[0].timeDead <= 0.0f) {
+						mode = GameMode::STATE_SINGLE_PLAYER_PAUSED;
+					}
 				}
 				else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 					if (event.key.keysym.scancode == SDL_SCANCODE_L && state.player[0].timeDead <= 0.0f) {
 						state.player[0].changeDirection();
 					}else if (event.key.keysym.scancode == SDL_SCANCODE_A && state.player[1].timeDead <= 0.0f) {
 						state.player[1].changeDirection();
+					}
+					else if (event.key.keysym.scancode == SDL_SCANCODE_SPACE &&
+						state.player[0].timeDead <= 0.0f && state.player[1].timeDead <= 0.0f) {
+						mode = GameMode::STATE_TWO_PLAYER_PAUSED;
+					}
+				}
+				else if (mode == GameMode::STATE_SINGLE_PLAYER_PAUSED) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_P) {
+						mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
+					}
+				}
+				else if (mode == GameMode::STATE_TWO_PLAYER_PAUSED) {
+					if (event.key.keysym.scancode == SDL_SCANCODE_SPACE) {
+						mode = GameMode::STATE_TWO_PLAYER_PLAY;
 					}
 				}
 			}

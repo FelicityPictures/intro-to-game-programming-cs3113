@@ -110,6 +110,9 @@ void GameState::RenderGame(int mode) {
 		yPositionOfText = 0.1f - (height / 2);
 		drawText(program, textSheet, P2scoreText, xPositionOfText, yPositionOfText, height);
 	}
+	else if (mode == GameMode::STATE_SINGLE_PLAYER_PAUSED || mode == GameMode::STATE_TWO_PLAYER_PAUSED) {
+		drawText(program, textSheet, "PAUSED", 0.0f - (3.0f * 0.15f), 0.0f, 0.15f);
+	}
 }
 
 bool GameState::UpdateGame(float elapsed, int mode) {

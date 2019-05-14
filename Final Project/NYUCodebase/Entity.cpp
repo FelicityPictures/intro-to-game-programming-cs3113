@@ -157,9 +157,10 @@ Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(1.25f) {
 
 enum GameMode {
 	STATE_MAIN_MENU,
-	STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_GAME_OVER,
-	STATE_TWO_PLAYER_PLAY, STATE_TWO_PLAYER_GAME_OVER
+	STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_GAME_OVER, STATE_SINGLE_PLAYER_PAUSED,
+	STATE_TWO_PLAYER_PLAY, STATE_TWO_PLAYER_GAME_OVER, STATE_TWO_PLAYER_PAUSED
 };
+
 void Map::draw(ShaderProgram &p, const GLuint &texture, int mode) const {
 	for (size_t x = 0; x < mapObjects.size(); x++) {
 		for (size_t y = 0; y < mapObjects[x].size(); y++) {

@@ -191,8 +191,8 @@ Button::Button(char* newtext, float height, float x, float y, float red, float g
 
 bool Button::clicked(float clickX, float clickY) {
 	float sizeOfLetters = height * 0.5f;
-	float halfWidth = (text.size() + 1) * sizeOfLetters;
-	float halfHeight = height / 2;
+	float halfWidth = (float(text.size() + 1) * sizeOfLetters) / 2.0f;
+	float halfHeight = height / 2.0f;
 	if ((clickX > xPosition - halfWidth) && (clickX < xPosition + halfWidth) &&
 		(clickY > yPosition - halfHeight) && (clickY < yPosition + halfHeight) ) {
 		return true;
