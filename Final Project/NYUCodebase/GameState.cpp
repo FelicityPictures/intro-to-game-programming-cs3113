@@ -85,6 +85,31 @@ void GameState::RenderGame(int mode) {
 		float yPositionOfText = 0.1f - (height / 2);
 		drawText(program, textSheet, P1scoreText, xPositionOfText, yPositionOfText, height);
 	}
+	else if (mode == GameMode::STATE_TWO_PLAYER_GAME_OVER) {
+		imageForWholeScreen(program, gameOverScreen);
+		for (size_t i = 0; i < 3; i++) {
+			gameOverButtons[i].draw(program, untexturedProgram, textSheet);
+		}
+		float height = 0.1f;
+		float xPositionOfText = -0.9f - (float(strlen(P1scoreText) / 2.0f) * height) + (height / 2);
+		float yPositionOfText = 0.1f - (height / 2);
+		P1scoreText[0] = 'B';
+		P1scoreText[1] = 'L';
+		P1scoreText[2] = 'U';
+		P1scoreText[3] = 'E';
+		P1scoreText[4] = ':';
+		drawText(program, textSheet, P1scoreText, xPositionOfText, yPositionOfText, height);
+
+		char P2scoreText[] = "RED: 0000";
+		temporaryScore = P2score;
+		for (int i = 0; i < 4; i++) {
+			P2scoreText[8 - i] = '0' + (temporaryScore % 10);
+			temporaryScore = floor(temporaryScore / 10);
+		}
+		xPositionOfText = 0.9f - (float(strlen(P2scoreText) / 2.0f) * height) + (height / 2);
+		yPositionOfText = 0.1f - (height / 2);
+		drawText(program, textSheet, P2scoreText, xPositionOfText, yPositionOfText, height);
+	}
 }
 
 bool GameState::UpdateGame(float elapsed, int mode) {
