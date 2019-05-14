@@ -33,6 +33,8 @@ GameState::GameState() {
 	GLuint backgroundTexture = LoadTexture(RESOURCE_FOLDER"background2.png");
 	backgrounds = Background(backgroundTexture);
 
+	player[0] = Player();
+	player[1] = Player(true);
 	top = InelasticBox(0.0f, 1.0 - 0.05f, (640.0f / 360.0f) * 2.0f, 0.1f);
 	bottom = InelasticBox(0.0f, (-1.0) + 0.05f, (640.0f / 360.0f) * 2.0f, 0.1f);
 	bottom.spriteIndex = 7;
@@ -41,7 +43,7 @@ GameState::GameState() {
 void GameState::RenderGame(int mode) {
 	int temporaryScore;
 	char scoreText[] = "Score 0000";
-	temporaryScore = score;
+	temporaryScore = P1score;
 	for (int i = 0; i < 4; i++) {
 		scoreText[9 - i] = '0' + (temporaryScore % 10);
 		temporaryScore = floor(temporaryScore / 10);
@@ -49,7 +51,6 @@ void GameState::RenderGame(int mode) {
 	switch (mode) {
 	case GameMode::STATE_MAIN_MENU:
 		imageForWholeScreen(program, titleScreen);
-		//titleScreenButtons[0].draw(program, untexturedProgram, textSheet);
 		for (size_t i = 0; i < 3; i++) {
 			titleScreenButtons[i].draw(program, untexturedProgram, textSheet);
 		}
@@ -59,10 +60,10 @@ void GameState::RenderGame(int mode) {
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
 		map.draw(program, spriteSheet);
-		player.draw(program, spriteSheet);
 		for (size_t i = 0; i < enemies.size(); i++) {
 			enemies[i].draw(program, spriteSheet);
 		}
+		player[0].draw(program, spriteSheet);
 		drawText(program, textSheet, scoreText, -1.7f, 0.95f, 0.05f);
 		break;
 	case GameMode::STATE_SINGLE_PLAYER_GAME_OVER:
@@ -79,27 +80,27 @@ void GameState::RenderGame(int mode) {
 }
 
 bool GameState::UpdateGame(float elapsed) {
-	player.update(elapsed);
-	if (player.timeDead <= 0.0f) {
+	player[0].update(elapsed);
+	if (player[0].timeDead <= 0.0f) {
 		backgrounds.update(elapsed, timeSurvived);
 		map.update(elapsed, timeSurvived);
-		player.checkInelasticCollision(top);
-		player.checkInelasticCollision(bottom);
-		score += player.checkMap(map);
+		player[0].checkInelasticCollision(top);
+		player[0].checkInelasticCollision(bottom);
+		P1score += player[0].checkMap(map);
 		for (size_t i = 0; i < enemies.size(); i++) {
-			if (enemies[i].update(elapsed, player.yPosition, timeSurvived)) {
+			if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
 				std::swap(enemies[i], enemies[enemies.size() - 1]);
 				enemies.pop_back();
 			}
 			else {
-				player.collideWithRocket(enemies[i]);
+				player[0].collideWithRocket(enemies[i]);
 			}
 		}
-		int numberOfValidRockets = floor(score / 100.0);
-		if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f) {
+		int numberOfValidRockets = floor(P1score / 100.0);
+		if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f - (0.1f * (numberOfValidRockets - 1))) {
 			int random = rand() % 5;
 			if (random > (5 - floorf(timeSurvived / 10.0f))) {
-				enemies.push_back(Enemy(player.yPosition, 0.5f, 0.5f));
+				enemies.push_back(Enemy(player[0].yPosition, 0.5f, 0.5f));
 				rocketTimer = 0.0f;
 				if (enemies.size() >= numberOfValidRockets) {
 					rocketTimer = -10.0f;
@@ -111,7 +112,7 @@ bool GameState::UpdateGame(float elapsed) {
 	}
 	else {
 		Mix_HaltMusic();
-		if (player.xPosition < -1.777f || player.yPosition < -1.0f) {
+		if (player[0].xPosition < -1.777f || player[0].yPosition < -1.0f) {
 			return true;
 		}
 	}
@@ -125,10 +126,12 @@ void GameState::ProcessInput(float elapsed) {
 void GameState::reset() {
 	Background backgrounds;
 
-	player = Player();
+	player[0] = Player();
+	player[1] = Player(true);
 	map = Map();
 	enemies.clear();
-	score = 0;
+	P1score = 0;
+	P2score = 0;
 	timeSurvived = 0.0f;
 	rocketTimer = 0.0f;
 

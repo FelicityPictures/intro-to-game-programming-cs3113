@@ -21,6 +21,7 @@ public:
 	float yPosition;
 	float hitboxWidth;
 	float hitboxHeight;
+	int baseSprite;
 	int spriteIndex;
 	float xVelocity = 0.0f;
 	float yVelocity = 0.0f;
@@ -79,7 +80,7 @@ public:
 	bool gravityDown = true;
 	float timeDead = 0.0f;
 
-	Player();
+	Player(bool left = false);
 	void draw(ShaderProgram &p, const GLuint &texture) const;
 
 	void update(float timeElapsed);

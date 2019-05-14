@@ -8,7 +8,7 @@
 #endif
 
 #define SPRITE_COUNT_X 4
-#define SPRITE_COUNT_Y 4
+#define SPRITE_COUNT_Y 9
 #define TILE_SIZE 0.15f
 
 extern glm::mat4 modelMatrix;
@@ -17,7 +17,7 @@ extern float defaultVertices[12];
 float gravity = 0.098f;
 
 Entity::Entity() : xPosition(0.0f), yPosition(0.0f), hitboxWidth(TILE_SIZE), hitboxHeight(TILE_SIZE) {}
-Entity::Entity(float x, float y, int spriteIndex) :	xPosition(x), yPosition(y), spriteIndex(spriteIndex), hitboxWidth(TILE_SIZE), hitboxHeight(TILE_SIZE) {
+Entity::Entity(float x, float y, int spriteIndex) :	xPosition(x), yPosition(y), spriteIndex(spriteIndex), baseSprite(spriteIndex), hitboxWidth(TILE_SIZE), hitboxHeight(TILE_SIZE) {
 }
 
 void Entity::draw(ShaderProgram &p, const GLuint &texture) const {
@@ -93,6 +93,7 @@ void InelasticBox::draw(ShaderProgram &p, const GLuint &texture) const {
 
 //0 = Nothing;
 //1 = Coin;
+//4 = deathtrap
 std::vector<int> nothing = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 void insertEmptySpace(std::deque<std::vector<int>>& map) {
@@ -154,27 +155,38 @@ Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(1.25f) {
 void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 	for (size_t x = 0; x < mapObjects.size(); x++) {
 		for (size_t y = 0; y < mapObjects[x].size(); y++) {
-			if (mapObjects[x][y] == 1) {
+			if (mapObjects[x][y] != 0) {
+				p.SetModelMatrix(modelMatrix);
+				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
+				glEnableVertexAttribArray(p.positionAttribute);
+				glBindTexture(GL_TEXTURE_2D, texture);
+				glm::mat4 transformMatrix = identityMatrix;
 				int spriteIndex;
-				float temp = fmod(animationTracker, 2.0f);
-				if (temp < 0.3f || temp > 1.7) {
-					spriteIndex = 8;
+				if (mapObjects[x][y] == 1) {
+					float temp = fmod(animationTracker, 2.0f);
+					if (temp < 0.3f || temp > 1.7) {
+						spriteIndex = 8;
+					}
+					else if ((temp >= 0.3f && temp < 0.6f) || (temp > 1.4f && temp <= 1.7f)) {
+						spriteIndex = 9;
+					}
+					else if ((temp >= 0.6f && temp < 0.9f) || (temp > 1.1f && temp <= 1.4f)) {
+						spriteIndex = 10;
+					}
+					else {
+						spriteIndex = 11;
+					}
+					float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
+					transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
+					transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 				}
-				else if ((temp >= 0.3f && temp < 0.6f) || (temp > 1.4f && temp <= 1.7f)) {
-					spriteIndex = 9;
+				else if (mapObjects[x][y] == 4) {
+					spriteIndex = 15;
+					float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
+					transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
+					transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
+					transformMatrix = glm::rotate(transformMatrix, animationTracker, glm::vec3(0.0f, 0.0f, 1.0f));
 				}
-				else if ((temp >= 0.6f && temp < 0.9f) || (temp > 1.1f && temp <= 1.4f)) {
-					spriteIndex = 10;
-				}
-				else {
-					spriteIndex = 11;
-				}
-				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-				p.SetModelMatrix(modelMatrix);
-				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
-				glEnableVertexAttribArray(p.positionAttribute);
-				glBindTexture(GL_TEXTURE_2D, texture);
-
 				float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
 				float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
 				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
@@ -190,43 +202,6 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
 				glEnableVertexAttribArray(p.texCoordAttribute);
 
-				glm::mat4 transformMatrix = identityMatrix;
-				float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
-				transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
-				transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
-				p.SetModelMatrix(transformMatrix);
-				glDrawArrays(GL_TRIANGLES, 0, 6);
-				glDisableVertexAttribArray(p.positionAttribute);
-				glDisableVertexAttribArray(p.texCoordAttribute);
-			}
-			else if (mapObjects[x][y] == 4) {
-				int spriteIndex = 15;
-				p.SetColor(255.0f / 255.0f, 255.0f / 255.0f, 0.0f / 255.0f, 1.0f);
-				p.SetModelMatrix(modelMatrix);
-				glVertexAttribPointer(p.positionAttribute, 2, GL_FLOAT, false, 0, defaultVertices);
-				glEnableVertexAttribArray(p.positionAttribute);
-				glBindTexture(GL_TEXTURE_2D, texture);
-
-				float u = (float)(((int)spriteIndex) % SPRITE_COUNT_X) / (float)SPRITE_COUNT_X;
-				float v = (float)(((int)spriteIndex) / SPRITE_COUNT_X) / (float)SPRITE_COUNT_Y;
-				float spriteWidth = 1.0f / (float)SPRITE_COUNT_X;
-				float spriteHeight = 1.0f / (float)SPRITE_COUNT_Y;
-				float texCoords[] = {
-				u + spriteWidth, v,
-				u, v,
-				u, v + spriteHeight,
-				u + spriteWidth, v,
-				u, v + spriteHeight,
-				u + spriteWidth, v + spriteHeight
-				};
-				glVertexAttribPointer(p.texCoordAttribute, 2, GL_FLOAT, false, 0, texCoords);
-				glEnableVertexAttribArray(p.texCoordAttribute);
-
-				glm::mat4 transformMatrix = identityMatrix;
-				float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
-				transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
-				transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
-				transformMatrix = glm::rotate(transformMatrix, animationTracker, glm::vec3(0.0f, 0.0f, 1.0f));
 				p.SetModelMatrix(transformMatrix);
 				glDrawArrays(GL_TRIANGLES, 0, 6);
 				glDisableVertexAttribArray(p.positionAttribute);
@@ -313,10 +288,10 @@ bool Enemy::update(float timeElapsed, float targetY, float timeSurvived) {
 		xPosition -= (3.0f + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
 		animationTracker += timeElapsed;
 		if (fmod(animationTracker, 0.2) < 0.1) {
-			spriteIndex = 13;
+			spriteIndex = baseSprite;
 		}
 		else {
-			spriteIndex = 14;
+			spriteIndex = baseSprite + 1;
 		}
 		if (xPosition < -2.0f) {
 			return true;
@@ -355,9 +330,14 @@ void Enemy::draw(ShaderProgram &p, const GLuint &texture) const {
 	glDisableVertexAttribArray(p.texCoordAttribute);
 }
 
-Player::Player() : Entity(-0.7f, -0.6f, 4) {
+Player::Player(bool left) : Entity(-0.7f, -0.6f, 0) {
 	hitboxWidth = TILE_SIZE * 0.75f;
 	hitboxHeight = TILE_SIZE * 0.75f;
+	if (left) {
+		xPosition = -0.85f;
+		baseSprite = 16;
+		spriteIndex = 16;
+	}
 }
 
 void Player::draw(ShaderProgram &p, const GLuint &texture) const {
@@ -412,16 +392,16 @@ void Player::update(float timeElapsed) {
 		float runSpeed = 0.7f;
 		float temp = fmod(animationTracker, runSpeed);
 		if (temp < runSpeed * 0.25f) {
-			spriteIndex = 0;
+			spriteIndex = baseSprite;
 		}
 		else if (temp >= runSpeed * 0.25f && temp < runSpeed * 0.5f) {
-			spriteIndex = 1;
+			spriteIndex = baseSprite + 1;
 		}
 		else if (temp >= runSpeed * 0.5f && temp < runSpeed * 0.75f) {
-			spriteIndex = 2;
+			spriteIndex = baseSprite + 2;
 		}
 		else {
-			spriteIndex = 3;
+			spriteIndex = baseSprite + 3;
 		}
 	}
 }
@@ -429,7 +409,7 @@ void Player::update(float timeElapsed) {
 void Player::changeDirection() {
 	gravityDown = !gravityDown;
 	yVelocity = 0.0f;
-	spriteIndex = 4;
+	spriteIndex = baseSprite + 4;
 	animationTracker = 0.0f;
 }
 void Player::checkInelasticCollision(const InelasticBox& box) {
@@ -453,7 +433,7 @@ bool Player::collideWithRocket(const Enemy& enemy) {
 	float YDistBetweenBlockAndPlayer = fabs(enemy.yPosition - yPosition) - ((enemy.hitboxHeight + hitboxHeight) / 2);
 	if (XDistBetweenBlockAndPlayer < 0.0f && YDistBetweenBlockAndPlayer < 0.0f) {
 		yVelocity = 0.0f;
-		spriteIndex = 5;
+		spriteIndex = baseSprite + 5;
 		timeDead += 0.0001f;
 		return true;
 	}
@@ -470,25 +450,27 @@ size_t Player::checkMap(Map& map) {
 	}
 	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
 		for (size_t y = upperY - 1; y < lowerY + 2 && y < map.mapObjects[x].size(); y++) {
-			//check collision against coin
 			float objectX = map.xPositionOfHead + (TILE_SIZE * x);
-			float objectY = (1.0 - 0.1 - (TILE_SIZE / 2)) - (TILE_SIZE * y);
+			float objectY = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
+			//check collision against coin
 			if (map.mapObjects[x][y] == 1) {
-				//circle circle collision
+				//circle circle collisionf
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
 				float c = sqrt(aSquared + bSquared);
-				if (c < hitboxHeight + (TILE_SIZE / 2.0f)) {
+				if (c < hitboxHeight + (TILE_SIZE * 0.4)) {
 					map.mapObjects[x][y] = 0;
 					ret++;
 				}
 			}
+			// check collision against death trap
 			else if (map.mapObjects[x][y] == 4) {
-				float XDistBetweenObstacleAndPlayer = (float)abs(objectX - xPosition) - ((TILE_SIZE + hitboxWidth) / 2);
-				float YDistBetweenObstacleAndPlayer = (float)abs(objectY - yPosition) - ((TILE_SIZE + hitboxHeight) / 2);
-				if (XDistBetweenObstacleAndPlayer < 0.0f && YDistBetweenObstacleAndPlayer < 0.0f) {
+				float aSquared = pow(objectX - xPosition, 2.0f);
+				float bSquared = pow(objectY - yPosition, 2.0f);
+				float c = sqrt(aSquared + bSquared);
+				if (c < hitboxHeight + (TILE_SIZE * 0.7f)) {
 					yVelocity = 0.0f;
-					spriteIndex = 5;
+					spriteIndex = baseSprite + 5;
 					timeDead += 0.0001f;
 				}
 			}

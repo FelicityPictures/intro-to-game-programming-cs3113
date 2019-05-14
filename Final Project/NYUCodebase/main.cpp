@@ -98,9 +98,9 @@ int main(int argc, char *argv[]){
 				}
 			}
 			else if (event.type == SDL_KEYDOWN) {
-				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player.timeDead <= 0.0f) {
-					state.player.changeDirection();
-					if (state.player.gravityDown) {
+				if (event.key.keysym.scancode == SDL_SCANCODE_SPACE && state.player[0].timeDead <= 0.0f) {
+					state.player[0].changeDirection();
+					if (state.player[0].gravityDown) {
 						state.bottom.spriteIndex = 7;
 						state.top.spriteIndex = 6;
 					}
@@ -110,7 +110,7 @@ int main(int argc, char *argv[]){
 					}
 				}
 				else if (event.key.keysym.scancode == SDL_SCANCODE_E) {
-					state.enemies.push_back(Enemy(state.player.yPosition, 0.5f, 0.5f));
+					state.enemies.push_back(Enemy(state.player[0].yPosition, 0.5f, 0.5f));
 				}
 			}
         }

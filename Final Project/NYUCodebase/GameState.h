@@ -16,7 +16,10 @@
 #include "stb_image.h"
 #include <SDL_mixer.h>
 
-enum GameMode { STATE_MAIN_MENU, STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_GAME_OVER };
+enum GameMode { STATE_MAIN_MENU,
+	STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_GAME_OVER,
+	STATE_TWO_PLAYER_PLAY, STATE_TWO_PLAYER_GAME_OVER};
+
 class GameState {
 public:
 	ShaderProgram program;
@@ -32,11 +35,12 @@ public:
 	GLuint spriteSheet, textSheet;
 	Background backgrounds;
 
-	Player player;
+	Player player[2];
 	InelasticBox top, bottom;
 	Map map;
 	std::vector<Enemy> enemies;
-	size_t score = 0;
+	size_t P1score = 0;
+	size_t P2score = 0;
 	float timeSurvived = 0.0f;
 	float rocketTimer = 0.0f;
 
