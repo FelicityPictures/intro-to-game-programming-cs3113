@@ -162,6 +162,7 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				glBindTexture(GL_TEXTURE_2D, texture);
 				glm::mat4 transformMatrix = identityMatrix;
 				int spriteIndex;
+				float yPosition = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f);
 				if (mapObjects[x][y] == 1) {
 					float temp = fmod(animationTracker, 2.0f);
 					if (temp < 0.3f || temp > 1.7) {
@@ -176,13 +177,11 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 					else {
 						spriteIndex = 11;
 					}
-					float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
 					transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
 					transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 				}
 				else if (mapObjects[x][y] == 4) {
 					spriteIndex = 15;
-					float yPosition = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
 					transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
 					transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
 					transformMatrix = glm::rotate(transformMatrix, animationTracker, glm::vec3(0.0f, 0.0f, 1.0f));
@@ -230,7 +229,7 @@ void Map::insertNewPartIntoMap() {
 	}
 	int nextInsertShape = rand() % 7;
 	switch (nextInsertShape) {
-	case 0: {
+	/*case 0: {
 		insertInfinityShapeCoins(mapObjects);
 		break;
 	}
@@ -245,7 +244,7 @@ void Map::insertNewPartIntoMap() {
 	case 3: {
 		insertBottomCoins(mapObjects);
 		break;
-	}
+	}*/
 	case 4: {
 		mapObjects.push_back({4,4,4,0,0,0,0,0,0,0,0,0});
 		break;
@@ -450,15 +449,16 @@ size_t Player::checkMap(Map& map) {
 	}
 	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
 		for (size_t y = upperY - 1; y < lowerY + 2 && y < map.mapObjects[x].size(); y++) {
-			float objectX = map.xPositionOfHead + (TILE_SIZE * x);
-			float objectY = (1.0f - 0.1f - (TILE_SIZE / 2.0f)) - (TILE_SIZE * y);
+			float objectX = map.xPositionOfHead + float(TILE_SIZE * x);
+			float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE /2.0f);
+			//float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) + (TILE_SIZE / 2.0f);
 			//check collision against coin
 			if (map.mapObjects[x][y] == 1) {
 				//circle circle collisionf
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
 				float c = sqrt(aSquared + bSquared);
-				if (c < hitboxHeight + (TILE_SIZE * 0.4)) {
+				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.4)/2.0f)) {
 					map.mapObjects[x][y] = 0;
 					ret++;
 				}
@@ -468,10 +468,13 @@ size_t Player::checkMap(Map& map) {
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
 				float c = sqrt(aSquared + bSquared);
-				if (c < hitboxHeight + (TILE_SIZE * 0.7f)) {
+				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.7f) / 2.0f)) {
 					yVelocity = 0.0f;
 					spriteIndex = baseSprite + 5;
 					timeDead += 0.0001f;
+				}
+				else {
+					float x = 0.0f;
 				}
 			}
 		}
