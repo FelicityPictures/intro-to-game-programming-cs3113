@@ -1,5 +1,8 @@
 #include "Entity.h"
 #include "helper.h"
+#include <algorithm>
+
+using std::max;
 
 #ifdef _WINDOWS
 #define RESOURCE_FOLDER ""
@@ -229,7 +232,7 @@ void Map::insertNewPartIntoMap() {
 	}
 	int nextInsertShape = rand() % 7;
 	switch (nextInsertShape) {
-	/*case 0: {
+	case 0: {
 		insertInfinityShapeCoins(mapObjects);
 		break;
 	}
@@ -244,7 +247,7 @@ void Map::insertNewPartIntoMap() {
 	case 3: {
 		insertBottomCoins(mapObjects);
 		break;
-	}*/
+	}
 	case 4: {
 		mapObjects.push_back({4,4,4,0,0,0,0,0,0,0,0,0});
 		break;
@@ -441,16 +444,16 @@ bool Player::collideWithRocket(const Enemy& enemy) {
 
 size_t Player::checkMap(Map& map) {
 	size_t ret = 0;
-	float almostY = (yPosition - (1.0f - 0.1f - (TILE_SIZE / 2.0f))) / (-TILE_SIZE);
-	int upperY = floor(almostY);
-	int lowerY = ceil(almostY);
-	if (upperY == 0) {
-		upperY = 1;
-	}
+	//float almostY = (yPosition - (1.0f - 0.1f - (TILE_SIZE / 2.0f))) / (-TILE_SIZE);
+	float almostY = ((2.0f * (yPosition - 0.9f)) + TILE_SIZE) / (-2.0f * TILE_SIZE);
+	//1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f)
+	int lowerY = floor(almostY);
+	char buf[255];
 	for (size_t x = 7; x < 10 && x < map.mapObjects.size(); x++) {
-		for (size_t y = upperY - 1; y < lowerY + 2 && y < map.mapObjects[x].size(); y++) {
+		for (size_t y = max(0, lowerY - 1); y < lowerY + 5 && y < map.mapObjects[x].size(); y++) {
+		//for (size_t y = 0; y < 12; y++) {
 			float objectX = map.xPositionOfHead + float(TILE_SIZE * x);
-			float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE /2.0f);
+			float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f);
 			//float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) + (TILE_SIZE / 2.0f);
 			//check collision against coin
 			if (map.mapObjects[x][y] == 1) {
@@ -458,7 +461,7 @@ size_t Player::checkMap(Map& map) {
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
 				float c = sqrt(aSquared + bSquared);
-				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.4)/2.0f)) {
+				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.6)/2.0f)) {
 					map.mapObjects[x][y] = 0;
 					ret++;
 				}
@@ -472,9 +475,6 @@ size_t Player::checkMap(Map& map) {
 					yVelocity = 0.0f;
 					spriteIndex = baseSprite + 5;
 					timeDead += 0.0001f;
-				}
-				else {
-					float x = 0.0f;
 				}
 			}
 		}
