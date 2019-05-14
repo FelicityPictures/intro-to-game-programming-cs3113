@@ -77,7 +77,7 @@ int main(int argc, char *argv[]){
 						mode = GameMode::STATE_SINGLE_PLAYER_PLAY;
 					}
 					else if (state.titleScreenButtons[1].clicked(unitX, unitY)) {
-						//MULTIPLAYER
+						mode = GameMode::STATE_TWO_PLAYER_PLAY;
 					}
 					else if (state.titleScreenButtons[2].clicked(unitX, unitY)) {
 						done = true;
@@ -118,11 +118,16 @@ int main(int argc, char *argv[]){
 
 		// TIMING and UPDATE
 		float ticks = (float)SDL_GetTicks() / 1000.0f;
-		if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+		if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY || mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 			timeAccumulator += ticks - lastFrameTicks;
 			while (timeAccumulator >= FIXED_TIMESTEP) {
-				if (state.UpdateGame(FIXED_TIMESTEP)) {
-					mode = GameMode::STATE_SINGLE_PLAYER_GAME_OVER;
+				if (state.UpdateGame(FIXED_TIMESTEP, mode)) {
+					if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+						mode = GameMode::STATE_SINGLE_PLAYER_GAME_OVER;
+					}
+					else {
+						mode = GameMode::STATE_TWO_PLAYER_GAME_OVER;
+					}
 				}
 				timeAccumulator -= FIXED_TIMESTEP;
 			}

@@ -290,10 +290,10 @@ bool Enemy::update(float timeElapsed, float targetY, float timeSurvived) {
 		xPosition -= (3.0f + (0.1 * floorf(timeSurvived / 5.0f))) * timeElapsed;
 		animationTracker += timeElapsed;
 		if (fmod(animationTracker, 0.2) < 0.1) {
-			spriteIndex = baseSprite;
+			spriteIndex = baseSprite + 1;
 		}
 		else {
-			spriteIndex = baseSprite + 1;
+			spriteIndex = baseSprite + 2;
 		}
 		if (xPosition < -2.0f) {
 			return true;

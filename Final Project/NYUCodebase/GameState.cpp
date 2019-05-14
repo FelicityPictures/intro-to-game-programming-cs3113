@@ -48,14 +48,13 @@ void GameState::RenderGame(int mode) {
 		scoreText[9 - i] = '0' + (temporaryScore % 10);
 		temporaryScore = floor(temporaryScore / 10);
 	}
-	switch (mode) {
-	case GameMode::STATE_MAIN_MENU:
+	if (mode == GameMode::STATE_MAIN_MENU) {
 		imageForWholeScreen(program, titleScreen);
 		for (size_t i = 0; i < 3; i++) {
 			titleScreenButtons[i].draw(program, untexturedProgram, textSheet);
 		}
-		break;
-	case GameMode::STATE_SINGLE_PLAYER_PLAY:
+	}
+	else if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY || mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 		backgrounds.draw(program);
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
@@ -65,8 +64,12 @@ void GameState::RenderGame(int mode) {
 		}
 		player[0].draw(program, spriteSheet);
 		drawText(program, textSheet, scoreText, -1.7f, 0.95f, 0.05f);
-		break;
-	case GameMode::STATE_SINGLE_PLAYER_GAME_OVER:
+		if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
+			player[1].draw(program, spriteSheet);
+			drawText(program, textSheet, scoreText, 1.5f, 0.95f, 0.05f);
+		}
+	}
+	else if (mode == GameMode::STATE_SINGLE_PLAYER_GAME_OVER) {
 		imageForWholeScreen(program, gameOverScreen);
 		for (size_t i = 0; i < 3; i++) {
 			gameOverButtons[i].draw(program, untexturedProgram, textSheet);
@@ -75,45 +78,89 @@ void GameState::RenderGame(int mode) {
 		float xPositionOfText = 0.0f - (float(strlen(scoreText) / 2.0f) * height) + (height / 2);
 		float yPositionOfText = 0.1f - (height / 2);
 		drawText(program, textSheet, scoreText, xPositionOfText, yPositionOfText, height);
-		break;
 	}
 }
 
-bool GameState::UpdateGame(float elapsed) {
+bool GameState::UpdateGame(float elapsed, int mode) {
 	player[0].update(elapsed);
-	if (player[0].timeDead <= 0.0f) {
-		backgrounds.update(elapsed, timeSurvived);
-		map.update(elapsed, timeSurvived);
-		player[0].checkInelasticCollision(top);
-		player[0].checkInelasticCollision(bottom);
-		P1score += player[0].checkMap(map);
-		for (size_t i = 0; i < enemies.size(); i++) {
-			if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
-				std::swap(enemies[i], enemies[enemies.size() - 1]);
-				enemies.pop_back();
-			}
-			else {
-				player[0].collideWithRocket(enemies[i]);
-			}
-		}
-		int numberOfValidRockets = floor(P1score / 100.0);
-		if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f - (0.1f * (numberOfValidRockets - 1))) {
-			int random = rand() % 5;
-			if (random > (5 - floorf(timeSurvived / 10.0f))) {
-				enemies.push_back(Enemy(player[0].yPosition, 0.5f, 0.5f));
-				rocketTimer = 0.0f;
-				if (enemies.size() >= numberOfValidRockets) {
-					rocketTimer = -10.0f;
+	if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+		if (player[0].timeDead <= 0.0f) {
+			backgrounds.update(elapsed, timeSurvived);
+			map.update(elapsed, timeSurvived);
+			player[0].checkInelasticCollision(top);
+			player[0].checkInelasticCollision(bottom);
+			P1score += player[0].checkMap(map);
+			for (size_t i = 0; i < enemies.size(); i++) {
+				if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
+					std::swap(enemies[i], enemies[enemies.size() - 1]);
+					enemies.pop_back();
+				}
+				else {
+					player[0].collideWithRocket(enemies[i]);
 				}
 			}
+			int numberOfValidRockets = floor(P1score / 100.0);
+			if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f - (0.1f * (numberOfValidRockets - 1))) {
+				int random = rand() % 5;
+				if (random > (5 - floorf(timeSurvived / 10.0f))) {
+					enemies.push_back(Enemy(player[0].yPosition, 0.5f, 0.5f));
+					rocketTimer = 0.0f;
+					if (enemies.size() >= numberOfValidRockets) {
+						rocketTimer = -10.0f;
+					}
+				}
+			}
+			rocketTimer += elapsed;
+			timeSurvived += elapsed;
 		}
-		rocketTimer += elapsed;
-		timeSurvived += elapsed;
+		else {
+			Mix_HaltMusic();
+			if (player[0].xPosition < -1.777f || player[0].yPosition < -1.0f) {
+				return true;
+			}
+		}
 	}
-	else {
-		Mix_HaltMusic();
-		if (player[0].xPosition < -1.777f || player[0].yPosition < -1.0f) {
-			return true;
+	else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
+		player[1].update(elapsed);
+		if (player[0].timeDead <= 0.0f || player[1].timeDead <= 0.0f) {
+			backgrounds.update(elapsed, timeSurvived);
+			map.update(elapsed, timeSurvived);
+			player[0].checkInelasticCollision(top);
+			player[0].checkInelasticCollision(bottom);
+			player[1].checkInelasticCollision(top);
+			player[1].checkInelasticCollision(bottom);
+			P1score += player[0].checkMap(map);
+			P2score += player[1].checkMap(map);
+			// rockets follor player 1
+			for (size_t i = 0; i < enemies.size(); i++) {
+				if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
+					std::swap(enemies[i], enemies[enemies.size() - 1]);
+					enemies.pop_back();
+				}
+				else {
+					player[0].collideWithRocket(enemies[i]);
+					player[1].collideWithRocket(enemies[i]);
+				}
+			}
+			int numberOfValidRockets = floor((P1score + P2score) / 100.0);
+			if (enemies.size() < numberOfValidRockets && rocketTimer > 2.0f - (0.1f * (numberOfValidRockets - 1))) {
+				int random = rand() % 5;
+				if (random > (5 - floorf(timeSurvived / 10.0f))) {
+					enemies.push_back(Enemy(player[0].yPosition, 0.5f, 0.5f));
+					rocketTimer = 0.0f;
+					if (enemies.size() >= numberOfValidRockets) {
+						rocketTimer = -10.0f;
+					}
+				}
+			}
+			rocketTimer += elapsed;
+			timeSurvived += elapsed;
+		}
+		else {
+			Mix_HaltMusic();
+			if ((player[0].xPosition < -1.777f || player[0].yPosition < -1.0f) && (player[1].xPosition < -1.777f || player[1].yPosition < -1.0f)) {
+				return true;
+			}
 		}
 	}
 	return false;

@@ -38,7 +38,7 @@ public:
 	Player player[2];
 	InelasticBox top, bottom;
 	Map map;
-	std::vector<Enemy> enemies;
+	std::deque<Enemy> enemies;
 	size_t P1score = 0;
 	size_t P2score = 0;
 	float timeSurvived = 0.0f;
@@ -46,7 +46,7 @@ public:
 
 	GameState();
 	void RenderGame(int mode);
-	bool UpdateGame(float elapsed);
+	bool UpdateGame(float elapsed, int mode);
 	void ProcessInput(float elapsed);
 
 	void reset();
