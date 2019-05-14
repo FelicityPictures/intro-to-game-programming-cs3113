@@ -155,7 +155,12 @@ Map::Map() : xPositionOfHead(-1.777f - (TILE_SIZE / 2)), speed(1.25f) {
 	}
 }
 
-void Map::draw(ShaderProgram &p, const GLuint &texture) const {
+enum GameMode {
+	STATE_MAIN_MENU,
+	STATE_SINGLE_PLAYER_PLAY, STATE_SINGLE_PLAYER_GAME_OVER,
+	STATE_TWO_PLAYER_PLAY, STATE_TWO_PLAYER_GAME_OVER
+};
+void Map::draw(ShaderProgram &p, const GLuint &texture, int mode) const {
 	for (size_t x = 0; x < mapObjects.size(); x++) {
 		for (size_t y = 0; y < mapObjects[x].size(); y++) {
 			if (mapObjects[x][y] != 0) {
@@ -166,19 +171,34 @@ void Map::draw(ShaderProgram &p, const GLuint &texture) const {
 				glm::mat4 transformMatrix = identityMatrix;
 				int spriteIndex;
 				float yPosition = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f);
-				if (mapObjects[x][y] == 1) {
+				if (mapObjects[x][y] == 1 || mapObjects[x][y] == 2 || mapObjects[x][y] == 3) {
 					float temp = fmod(animationTracker, 2.0f);
+					int baseSprite;
+					if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+						baseSprite = 8;
+					}
+					else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
+						if (mapObjects[x][y] == 1) {
+							baseSprite = 24;
+						}
+						else if (mapObjects[x][y] == 2) {
+							baseSprite = 28;
+						}
+						else {
+							baseSprite = 32;
+						}
+					}
 					if (temp < 0.3f || temp > 1.7) {
-						spriteIndex = 8;
+						spriteIndex = baseSprite;
 					}
 					else if ((temp >= 0.3f && temp < 0.6f) || (temp > 1.4f && temp <= 1.7f)) {
-						spriteIndex = 9;
+						spriteIndex = baseSprite + 1;
 					}
 					else if ((temp >= 0.6f && temp < 0.9f) || (temp > 1.1f && temp <= 1.4f)) {
-						spriteIndex = 10;
+						spriteIndex = baseSprite + 2;
 					}
 					else {
-						spriteIndex = 11;
+						spriteIndex = baseSprite + 3;
 					}
 					transformMatrix = glm::translate(transformMatrix, glm::vec3(xPositionOfHead + (TILE_SIZE * x), yPosition, 0.0f));
 					transformMatrix = glm::scale(transformMatrix, glm::vec3(TILE_SIZE, TILE_SIZE, 0.0f));
@@ -442,27 +462,43 @@ bool Player::collideWithRocket(const Enemy& enemy) {
 	return false;
 }
 
-size_t Player::checkMap(Map& map) {
+size_t Player::checkMap(Map& map, int mode) {
 	size_t ret = 0;
-	//float almostY = (yPosition - (1.0f - 0.1f - (TILE_SIZE / 2.0f))) / (-TILE_SIZE);
 	float almostY = ((2.0f * (yPosition - 0.9f)) + TILE_SIZE) / (-2.0f * TILE_SIZE);
-	//1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f)
 	int lowerY = floor(almostY);
 	char buf[255];
 	for (size_t x = 5; x < 10 && x < map.mapObjects.size(); x++) {
 		for (size_t y = max(0, lowerY - 1); y < lowerY + 5 && y < map.mapObjects[x].size(); y++) {
-		//for (size_t y = 0; y < 12; y++) {
 			float objectX = map.xPositionOfHead + float(TILE_SIZE * x);
 			float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) - float(TILE_SIZE / 2.0f);
-			//float objectY = 1.0f - 0.1f - float(TILE_SIZE * y) + (TILE_SIZE / 2.0f);
 			//check collision against coin
-			if (map.mapObjects[x][y] == 1) {
-				//circle circle collisionf
+			if (map.mapObjects[x][y] == 1 || map.mapObjects[x][y] == 2 || map.mapObjects[x][y] == 3) {
+				//circle circle collision
 				float aSquared = pow(objectX - xPosition, 2.0f);
 				float bSquared = pow(objectY - yPosition, 2.0f);
 				float c = sqrt(aSquared + bSquared);
 				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.6)/2.0f)) {
-					map.mapObjects[x][y] = 0;
+					if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
+						map.mapObjects[x][y] = 0;
+					}
+					else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
+						if (baseSprite == 0) {
+							if (map.mapObjects[x][y] == 1) {
+								map.mapObjects[x][y] = 2;
+							}
+							else if (map.mapObjects[x][y] == 3) {
+								map.mapObjects[x][y] = 0;
+							}
+						}
+						else {
+							if (map.mapObjects[x][y] == 1) {
+								map.mapObjects[x][y] = 3;
+							}
+							else if (map.mapObjects[x][y] == 2) {
+								map.mapObjects[x][y] = 0;
+							}
+						}
+					}
 					ret++;
 				}
 			}

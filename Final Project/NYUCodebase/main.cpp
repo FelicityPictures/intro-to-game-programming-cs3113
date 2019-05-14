@@ -96,6 +96,19 @@ int main(int argc, char *argv[]){
 						done = true;
 					}
 				}
+				else if (mode == GameMode::STATE_TWO_PLAYER_GAME_OVER) {
+					if (state.gameOverButtons[0].clicked(unitX, unitY)) {
+						state.reset();
+						mode = GameMode::STATE_TWO_PLAYER_PLAY;
+					}
+					else if (state.gameOverButtons[1].clicked(unitX, unitY)) {
+						state.reset();
+						mode = GameMode::STATE_MAIN_MENU;
+					}
+					else if (state.gameOverButtons[2].clicked(unitX, unitY)) {
+						done = true;
+					}
+				}
 			}
 			else if (event.type == SDL_KEYUP) {
 				if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {

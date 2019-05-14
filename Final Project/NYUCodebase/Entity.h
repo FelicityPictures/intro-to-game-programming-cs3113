@@ -56,7 +56,7 @@ public:
 	float animationTracker = 0.0f;
 
 	Map();
-	void draw(ShaderProgram &p, const GLuint &texture) const;
+	void draw(ShaderProgram &p, const GLuint &texture, int mode) const;
 
 	void update(float timeElapsed, float timeSurvived);
 
@@ -87,5 +87,5 @@ public:
 	void changeDirection();
 	void checkInelasticCollision(const InelasticBox& box);
 	bool collideWithRocket(const Enemy& enemy);
-	size_t checkMap(Map& map);
+	size_t checkMap(Map& map, int mode);
 };

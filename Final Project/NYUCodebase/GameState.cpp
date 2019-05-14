@@ -58,7 +58,7 @@ void GameState::RenderGame(int mode) {
 		backgrounds.draw(program);
 		top.draw(program, spriteSheet);
 		bottom.draw(program, spriteSheet);
-		map.draw(program, spriteSheet);
+		map.draw(program, spriteSheet, mode);
 		for (size_t i = 0; i < enemies.size(); i++) {
 			enemies[i].draw(program, spriteSheet);
 		}
@@ -120,7 +120,7 @@ bool GameState::UpdateGame(float elapsed, int mode) {
 			map.update(elapsed, timeSurvived);
 			player[0].checkInelasticCollision(top);
 			player[0].checkInelasticCollision(bottom);
-			P1score += player[0].checkMap(map);
+			P1score += player[0].checkMap(map, mode);
 			for (size_t i = 0; i < enemies.size(); i++) {
 				if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
 					std::swap(enemies[i], enemies[enemies.size() - 1]);
@@ -160,8 +160,8 @@ bool GameState::UpdateGame(float elapsed, int mode) {
 			player[0].checkInelasticCollision(bottom);
 			player[1].checkInelasticCollision(top);
 			player[1].checkInelasticCollision(bottom);
-			P1score += player[0].checkMap(map);
-			P2score += player[1].checkMap(map);
+			P1score += player[0].checkMap(map, mode);
+			P2score += player[1].checkMap(map, mode);
 			// rockets follor player 1
 			for (size_t i = 0; i < enemies.size(); i++) {
 				if (enemies[i].update(elapsed, player[0].yPosition, timeSurvived)) {
