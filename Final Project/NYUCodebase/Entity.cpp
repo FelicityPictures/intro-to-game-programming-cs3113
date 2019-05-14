@@ -480,26 +480,30 @@ size_t Player::checkMap(Map& map, int mode) {
 				if (c < (hitboxHeight / 2.0f) + ((TILE_SIZE * 0.6)/2.0f)) {
 					if (mode == GameMode::STATE_SINGLE_PLAYER_PLAY) {
 						map.mapObjects[x][y] = 0;
+						ret++;
 					}
 					else if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 						if (baseSprite == 0) {
 							if (map.mapObjects[x][y] == 1) {
 								map.mapObjects[x][y] = 2;
+								ret++;
 							}
 							else if (map.mapObjects[x][y] == 3) {
 								map.mapObjects[x][y] = 0;
+								ret++;
 							}
 						}
 						else {
 							if (map.mapObjects[x][y] == 1) {
 								map.mapObjects[x][y] = 3;
+								ret++;
 							}
 							else if (map.mapObjects[x][y] == 2) {
 								map.mapObjects[x][y] = 0;
+								ret++;
 							}
 						}
 					}
-					ret++;
 				}
 			}
 			// check collision against death trap

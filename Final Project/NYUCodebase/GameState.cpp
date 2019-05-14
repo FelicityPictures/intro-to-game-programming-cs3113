@@ -63,7 +63,7 @@ void GameState::RenderGame(int mode) {
 			enemies[i].draw(program, spriteSheet);
 		}
 		player[0].draw(program, spriteSheet);
-		drawText(program, textSheet, P1scoreText, -1.7f, 0.95f, 0.05f);
+		drawText(program, textSheet, P1scoreText, 1.2f, 0.95f, 0.05f);
 		if (mode == GameMode::STATE_TWO_PLAYER_PLAY) {
 			player[1].draw(program, spriteSheet);
 			char P2scoreText[] = "Score 0000";
@@ -72,7 +72,7 @@ void GameState::RenderGame(int mode) {
 				P2scoreText[9 - i] = '0' + (temporaryScore % 10);
 				temporaryScore = floor(temporaryScore / 10);
 			}
-			drawText(program, textSheet, P2scoreText, 1.2f, 0.95f, 0.05f);
+			drawText(program, textSheet, P2scoreText, -1.7f, 0.95f, 0.05f);
 		}
 	}
 	else if (mode == GameMode::STATE_SINGLE_PLAYER_GAME_OVER) {
@@ -91,7 +91,7 @@ void GameState::RenderGame(int mode) {
 			gameOverButtons[i].draw(program, untexturedProgram, textSheet);
 		}
 		float height = 0.1f;
-		float xPositionOfText = -0.9f - (float(strlen(P1scoreText) / 2.0f) * height) + (height / 2);
+		float xPositionOfText = 0.9f - (float(strlen(P1scoreText) / 2.0f) * height) + (height / 2);
 		float yPositionOfText = 0.1f - (height / 2);
 		P1scoreText[0] = 'B';
 		P1scoreText[1] = 'L';
@@ -106,7 +106,7 @@ void GameState::RenderGame(int mode) {
 			P2scoreText[8 - i] = '0' + (temporaryScore % 10);
 			temporaryScore = floor(temporaryScore / 10);
 		}
-		xPositionOfText = 0.9f - (float(strlen(P2scoreText) / 2.0f) * height) + (height / 2);
+		xPositionOfText = -0.9f - (float(strlen(P2scoreText) / 2.0f) * height) + (height / 2);
 		yPositionOfText = 0.1f - (height / 2);
 		drawText(program, textSheet, P2scoreText, xPositionOfText, yPositionOfText, height);
 	}
