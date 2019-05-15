@@ -163,7 +163,7 @@ int main(int argc, char *argv[]){
 		// DRAWING
 		state.RenderGame(mode);
 
-		glClearColor(205.0f / 255.0f, 205.0f / 255.0f, 205.0f / 255.0f, 1.0f);
+		glClearColor(45.0f / 255.0f, 45.0f / 255.0f, 45.0f / 255.0f, 1.0f);
 		SDL_GL_SwapWindow(displayWindow);
     }
     

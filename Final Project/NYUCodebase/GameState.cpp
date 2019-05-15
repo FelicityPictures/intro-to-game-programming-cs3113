@@ -17,14 +17,14 @@ GameState::GameState() {
 
 	titleScreen = LoadTexture(RESOURCE_FOLDER"TitleScreen-01.png");
 	//char text[], float height, float x, float y, float red, float green, float blue
-	titleScreenButtons[0] = Button("Play!", 0.25f, 0.0f, -0.35f, 101.0f, 115.0f, 137.0f);
-	titleScreenButtons[1] = Button("2 Players", 0.12f, 0.0f, -0.65f, 255.0f, 0.0f, 0.0f);
+	titleScreenButtons[0] = Button("Play!", 0.25f, 0.0f, -0.35f, 3.0f, 39.0f, 96.0f);
+	titleScreenButtons[1] = Button("2 Players", 0.12f, 0.0f, -0.65f, 3.0f, 100.0f, 10.0f);
 	titleScreenButtons[2] = Button("Quit", 0.1f, 0.0f, -0.9f, 255.0f, 0.0f, 0.0f);
 
 	gameOverScreen = LoadTexture(RESOURCE_FOLDER"GameOverScreen-02.png");
-	gameOverButtons[0] = Button("Play Again", 0.25f, 0.0f, -0.35f, 101.0f, 115.0f, 137.0f);
-	gameOverButtons[1] = Button("Main Menu", 0.12f, -0.3f, -0.75f, 255.0f, 0.0f, 0.0f);
-	gameOverButtons[2] = Button("Quit", 0.12f, 0.4f, -0.75f, 255.0f, 0.0f, 0.0f);
+	gameOverButtons[0] = Button("Play Again", 0.25f, 0.0f, -0.35f, 3.0f, 39.0f, 96.0f);
+	gameOverButtons[1] = Button("Main Menu", 0.12f, -0.3f, -0.75f, 170.0f, 87.0f, 80.0f);
+	gameOverButtons[2] = Button("Quit", 0.12f, 0.4f, -0.75f, 170.0f, 87.0f, 80.0f);
 
 	spriteSheet = LoadTexture(RESOURCE_FOLDER"sprites-01.png");
 	textSheet = LoadTexture(RESOURCE_FOLDER"pixel_font.png");
